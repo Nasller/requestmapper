@@ -1,8 +1,8 @@
 package com.viartemev.requestmapper.annotations.spring
 
 import com.intellij.psi.PsiAnnotation
-import com.nhaarman.mockito_kotlin.mock
 import org.amshove.kluent.shouldBeEqualTo
+import org.mockito.kotlin.mock
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
 

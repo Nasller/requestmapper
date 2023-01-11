@@ -2,18 +2,11 @@ package com.viartemev.requestmapper
 
 import com.intellij.openapi.command.impl.DummyProject
 import com.intellij.openapi.project.Project
-import com.intellij.psi.PsiAnnotation
-import com.intellij.psi.PsiAnnotationMemberValue
-import com.intellij.psi.PsiClass
-import com.intellij.psi.PsiElement
-import com.intellij.psi.PsiMethod
-import com.intellij.psi.PsiModifierList
-import com.intellij.psi.PsiParameter
-import com.intellij.psi.PsiParameterList
-import com.nhaarman.mockito_kotlin.doReturn
-import com.nhaarman.mockito_kotlin.mock
+import com.intellij.psi.*
 import com.viartemev.requestmapper.contributor.RequestMappingByNameContributor
 import org.amshove.kluent.shouldBeEqualTo
+import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.mock
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
 

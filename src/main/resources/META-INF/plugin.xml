@@ -1,6 +1,6 @@
 <idea-plugin>
     <id>com.viartemev.requestmapper</id>
-    <name>Request mapper</name>
+    <name>Request Mapper</name>
     <version>1.0</version>
     <vendor email="viartemev@gmail.com" url="https://github.com/viartemev">Vyacheslav Artemyev</vendor>
 
@@ -22,7 +22,7 @@
 
     <change-notes><![CDATA[
         <ul>
-            <li>使支持版本2021.1 — 2021.2.3</li>
+            <li></li>
         </ul>
     ]]>
     </change-notes>

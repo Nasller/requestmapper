@@ -99,7 +99,7 @@ open class RequestMappingItemProvider : ChooseByNameItemProvider {
             return true
         }
 
-        private fun matches(name: String?, pattern: String): Boolean {
+        fun matches(name: String?, pattern: String): Boolean {
 
             if (name == null) {
                 return false

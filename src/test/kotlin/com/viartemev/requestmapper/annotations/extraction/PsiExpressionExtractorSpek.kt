@@ -1,14 +1,9 @@
 package com.viartemev.requestmapper.annotations.extraction
 
-import com.intellij.psi.PsiAssignmentExpression
-import com.intellij.psi.PsiBinaryExpression
-import com.intellij.psi.PsiExpression
-import com.intellij.psi.PsiLiteralExpression
-import com.intellij.psi.PsiPolyadicExpression
-import com.intellij.psi.PsiReferenceExpression
-import com.nhaarman.mockito_kotlin.doReturn
-import com.nhaarman.mockito_kotlin.mock
+import com.intellij.psi.*
 import org.amshove.kluent.shouldBeEqualTo
+import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.mock
 import org.spekframework.spek2.Spek
 import org.spekframework.spek2.style.specification.describe
 
