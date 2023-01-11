@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>com.viartemev.requestmapper</id>
     <name>Request Mapper</name>
-    <vendor email="viartemev@gmail.com" url="https://github.com/viartemev">Vyacheslav Artemyev</vendor>
+    <vendor email="nasller@qq.com" url="https://github.com/Nasller">Nasller</vendor>
 
     <description><![CDATA[
       Plugin for quick navigation to url mapping declaration.<br/>
