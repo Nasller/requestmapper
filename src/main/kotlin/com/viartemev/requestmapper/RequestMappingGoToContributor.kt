@@ -9,7 +9,7 @@ import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.fileEditor.impl.EditorTabPresentationUtil
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.util.text.StringUtil
+import com.intellij.openapi.util.Iconable
 import com.intellij.ui.ColoredListCellRenderer
 import com.intellij.ui.SimpleTextAttributes
 import com.intellij.ui.speedSearch.SpeedSearchUtil
@@ -54,35 +54,29 @@ class RequestMappingGoToContributor(event: AnActionEvent) : AbstractGotoSEContri
     }
 
     override fun getElementsRenderer(): ListCellRenderer<Any> {
-        return CustomSearchEverywherePsiRenderer(this)
-    }
-
-    private class CustomSearchEverywherePsiRenderer(private val parent: RequestMappingGoToContributor): SearchEverywherePsiRenderer(parent) {
-        override fun getListCellRendererComponent(list: JList<*>, value: Any, index: Int, isSelected: Boolean, cellHasFocus: Boolean): Component {
-            if(value !is RequestMappingItem) return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus)
-            removeAll()
-            val matchers = getItemMatchers(list, value)
-            val presentation = value.presentation
-            val locationString = presentation.locationString
-            val bgColor = if (isSelected) UIUtil.getListSelectionBackground(true) else value.psiElement.containingFile.let {
-                EditorTabPresentationUtil.getFileBackgroundColor(parent.project, it.virtualFile)
-            }
-            val locationLabel = if (StringUtil.isNotEmpty(locationString)) JLabel(locationString, SwingConstants.RIGHT) else null
-            if (locationLabel != null) {
+        return object : SearchEverywherePsiRenderer(this) {
+            override fun getListCellRendererComponent(list: JList<*>, value: Any, index: Int, isSelected: Boolean, cellHasFocus: Boolean): Component {
+                if (value !is RequestMappingItem) return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus)
+                removeAll()
+                val matchers = getItemMatchers(list, value)
+                val presentation = value.presentation
+                val containingFile = value.psiElement.containingFile
+                val bgColor = if (isSelected) UIUtil.getListSelectionBackground(true) else EditorTabPresentationUtil.getFileBackgroundColor(containingFile.project, containingFile.virtualFile)
+                val locationLabel = JLabel(presentation.locationString, value.psiElement.getIcon(Iconable.ICON_FLAG_READ_STATUS), SwingConstants.RIGHT)
                 locationLabel.horizontalTextPosition = SwingConstants.LEFT
                 locationLabel.foreground = if (isSelected) UIUtil.getListSelectionForeground(true) else UIUtil.getInactiveTextColor()
                 add(locationLabel, BorderLayout.EAST)
-            }
-            background = bgColor
-            val leftRenderer = object : ColoredListCellRenderer<Any>() {
-                override fun customizeCellRenderer(list: JList<*>, value: Any, index: Int, selected: Boolean, hasFocus: Boolean) {
-                    icon = presentation.getIcon(false)
-                    val nameAttributes = SimpleTextAttributes(SimpleTextAttributes.STYLE_PLAIN, null)
-                    SpeedSearchUtil.appendColoredFragmentForMatcher(presentation.presentableText!!, this, nameAttributes, matchers.nameMatcher, bgColor, selected)
+                background = bgColor
+                val leftRenderer = object : ColoredListCellRenderer<Any>() {
+                    override fun customizeCellRenderer(list: JList<*>, value: Any, index: Int, selected: Boolean, hasFocus: Boolean) {
+                        icon = presentation.getIcon(false)
+                        val nameAttributes = SimpleTextAttributes(SimpleTextAttributes.STYLE_PLAIN, null)
+                        SpeedSearchUtil.appendColoredFragmentForMatcher(presentation.presentableText!!, this, nameAttributes, matchers.nameMatcher, bgColor, selected)
+                    }
                 }
+                add(leftRenderer.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus), BorderLayout.WEST)
+                return this
             }
-            add(leftRenderer.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus), BorderLayout.WEST)
-            return this
         }
     }
 

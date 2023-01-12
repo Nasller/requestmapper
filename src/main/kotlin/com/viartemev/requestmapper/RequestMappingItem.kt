@@ -1,19 +1,21 @@
 package com.viartemev.requestmapper
 
 import com.intellij.navigation.ItemPresentation
-import com.intellij.navigation.NavigationItem
+import com.intellij.navigation.PsiElementNavigationItem
 import com.intellij.pom.Navigatable
 import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiMethod
 
-class RequestMappingItem(val psiElement: PsiElement, private val urlPath: String, private val requestMethod: String) : NavigationItem {
+class RequestMappingItem(val psiElement: PsiElement, private val urlPath: String, private val requestMethod: String) : PsiElementNavigationItem {
 
     private val navigationElement = psiElement.navigationElement as? Navigatable
 
     override fun getName(): String = this.requestMethod + " " + this.urlPath
 
     override fun getPresentation(): ItemPresentation = RequestMappingItemPresentation()
+
+    override fun getTargetElement(): PsiElement = psiElement
 
     override fun navigate(requestFocus: Boolean) = navigationElement?.navigate(requestFocus) ?: Unit
 

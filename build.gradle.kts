@@ -58,6 +58,10 @@ tasks {
         }
     }
 
+    buildSearchableOptions {
+        enabled = false
+    }
+
     wrapper {
         gradleVersion = properties("gradleVersion")
     }
