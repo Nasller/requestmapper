@@ -1,7 +1,6 @@
 package com.viartemev.requestmapper
 
 import com.intellij.ide.IdeBundle
-import com.intellij.ide.util.ModuleRendererFactory
 import com.intellij.ide.util.NavigationItemListCellRenderer
 import com.intellij.ide.util.PropertiesComponent
 import com.intellij.ide.util.gotoByName.ChooseByNameItemProvider
@@ -67,13 +66,12 @@ class RequestMappingModel(project: Project, contributors: List<ChooseByNameContr
             override fun getListCellRendererComponent(list: JList<*>, value: Any, index: Int, isSelected: Boolean, cellHasFocus: Boolean): Component {
                 if (value !is RequestMappingItem) return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus)
                 removeAll()
-                val factory = ModuleRendererFactory.findInstance(value)
-                val left = LeftRenderer(!factory.rendersLocationString(), MatcherHolder.getAssociatedMatcher(list))
+                val left = LeftRenderer(MatcherHolder.getAssociatedMatcher(list))
                 val leftCellRendererComponent = left.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus)
                 (leftCellRendererComponent as JComponent).isOpaque = false
                 add(leftCellRendererComponent, BorderLayout.WEST)
                 background = leftCellRendererComponent.background
-                val locationLabel = JLabel(value.psiElement.getIcon(Iconable.ICON_FLAG_READ_STATUS), SwingConstants.RIGHT)
+                val locationLabel = JLabel(value.presentation.locationString, value.targetElement.getIcon(Iconable.ICON_FLAG_READ_STATUS), SwingConstants.RIGHT)
                 locationLabel.horizontalTextPosition = SwingConstants.LEFT
                 locationLabel.foreground = leftCellRendererComponent.background
                 add(locationLabel, BorderLayout.EAST)
@@ -82,7 +80,7 @@ class RequestMappingModel(project: Project, contributors: List<ChooseByNameContr
         }
     }
 
-    private class LeftRenderer(val myRenderLocation: Boolean, private val myMatcher: Matcher?) : ColoredListCellRenderer<Any>() {
+    private class LeftRenderer(private val myMatcher: Matcher?) : ColoredListCellRenderer<Any>() {
         override fun customizeCellRenderer(list: JList<*>, value: Any, index: Int, selected: Boolean, hasFocus: Boolean) {
             var bgColor = UIUtil.getListBackground()
             if (value is PsiElement && !value.isValid) {
@@ -126,12 +124,6 @@ class RequestMappingModel(project: Project, contributors: List<ChooseByNameContr
                 val nameAttributes = SimpleTextAttributes.fromTextAttributes(textAttributes)
                 SpeedSearchUtil.appendColoredFragmentForMatcher(name, this, nameAttributes, myMatcher, bgColor, selected)
                 icon = presentation.getIcon(false)
-                if (myRenderLocation) {
-                    val containerText = presentation.locationString
-                    if (!containerText.isNullOrEmpty()) {
-                        append(" $containerText", SimpleTextAttributes(SimpleTextAttributes.STYLE_PLAIN, JBColor.GRAY))
-                    }
-                }
             } else {
                 icon = IconUtil.getEmptyIcon(false)
                 append(value.toString(), SimpleTextAttributes(SimpleTextAttributes.STYLE_PLAIN, list.foreground))

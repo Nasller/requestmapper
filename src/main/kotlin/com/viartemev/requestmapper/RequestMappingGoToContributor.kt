@@ -60,9 +60,9 @@ class RequestMappingGoToContributor(event: AnActionEvent) : AbstractGotoSEContri
                 removeAll()
                 val matchers = getItemMatchers(list, value)
                 val presentation = value.presentation
-                val containingFile = value.psiElement.containingFile
+                val containingFile = value.targetElement.containingFile
                 val bgColor = if (isSelected) UIUtil.getListSelectionBackground(true) else EditorTabPresentationUtil.getFileBackgroundColor(containingFile.project, containingFile.virtualFile)
-                val locationLabel = JLabel(presentation.locationString, value.psiElement.getIcon(Iconable.ICON_FLAG_READ_STATUS), SwingConstants.RIGHT)
+                val locationLabel = JLabel(presentation.locationString, value.targetElement.getIcon(Iconable.ICON_FLAG_READ_STATUS), SwingConstants.RIGHT)
                 locationLabel.horizontalTextPosition = SwingConstants.LEFT
                 locationLabel.foreground = if (isSelected) UIUtil.getListSelectionForeground(true) else UIUtil.getInactiveTextColor()
                 add(locationLabel, BorderLayout.EAST)
