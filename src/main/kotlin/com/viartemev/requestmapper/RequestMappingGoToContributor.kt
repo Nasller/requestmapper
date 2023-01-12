@@ -10,9 +10,6 @@ import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.fileEditor.impl.EditorTabPresentationUtil
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Iconable
-import com.intellij.ui.ColoredListCellRenderer
-import com.intellij.ui.SimpleTextAttributes
-import com.intellij.ui.speedSearch.SpeedSearchUtil
 import com.intellij.util.ui.UIUtil
 import com.viartemev.requestmapper.extensions.Extensions
 import java.awt.BorderLayout
@@ -67,13 +64,7 @@ class RequestMappingGoToContributor(event: AnActionEvent) : AbstractGotoSEContri
                 locationLabel.foreground = if (isSelected) UIUtil.getListSelectionForeground(true) else UIUtil.getInactiveTextColor()
                 add(locationLabel, BorderLayout.EAST)
                 background = bgColor
-                val leftRenderer = object : ColoredListCellRenderer<Any>() {
-                    override fun customizeCellRenderer(list: JList<*>, value: Any, index: Int, selected: Boolean, hasFocus: Boolean) {
-                        icon = presentation.getIcon(false)
-                        val nameAttributes = SimpleTextAttributes(SimpleTextAttributes.STYLE_PLAIN, null)
-                        SpeedSearchUtil.appendColoredFragmentForMatcher(presentation.presentableText!!, this, nameAttributes, matchers.nameMatcher, bgColor, selected)
-                    }
-                }
+                val leftRenderer = RequestMappingModel.MyLeftRenderer(matchers.nameMatcher)
                 add(leftRenderer.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus), BorderLayout.WEST)
                 return this
             }

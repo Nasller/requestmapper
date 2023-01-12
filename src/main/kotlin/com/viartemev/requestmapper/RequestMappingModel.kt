@@ -30,7 +30,6 @@ import com.intellij.util.IconUtil
 import com.intellij.util.text.Matcher
 import com.intellij.util.text.MatcherHolder
 import com.intellij.util.ui.UIUtil
-import com.viartemev.requestmapper.RequestMappingModel.LeftRenderer
 import java.awt.BorderLayout
 import java.awt.Component
 import javax.swing.*
@@ -66,21 +65,21 @@ class RequestMappingModel(project: Project, contributors: List<ChooseByNameContr
             override fun getListCellRendererComponent(list: JList<*>, value: Any, index: Int, isSelected: Boolean, cellHasFocus: Boolean): Component {
                 if (value !is RequestMappingItem) return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus)
                 removeAll()
-                val left = LeftRenderer(MatcherHolder.getAssociatedMatcher(list))
+                val left = MyLeftRenderer(MatcherHolder.getAssociatedMatcher(list))
                 val leftCellRendererComponent = left.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus)
                 (leftCellRendererComponent as JComponent).isOpaque = false
                 add(leftCellRendererComponent, BorderLayout.WEST)
                 background = leftCellRendererComponent.background
                 val locationLabel = JLabel(value.presentation.locationString, value.targetElement.getIcon(Iconable.ICON_FLAG_READ_STATUS), SwingConstants.RIGHT)
                 locationLabel.horizontalTextPosition = SwingConstants.LEFT
-                locationLabel.foreground = leftCellRendererComponent.background
+                locationLabel.foreground = if (isSelected) UIUtil.getListSelectionForeground(true) else UIUtil.getInactiveTextColor()
                 add(locationLabel, BorderLayout.EAST)
                 return this
             }
         }
     }
 
-    private class LeftRenderer(private val myMatcher: Matcher?) : ColoredListCellRenderer<Any>() {
+    class MyLeftRenderer(private val myMatcher: Matcher?) : ColoredListCellRenderer<Any>() {
         override fun customizeCellRenderer(list: JList<*>, value: Any, index: Int, selected: Boolean, hasFocus: Boolean) {
             var bgColor = UIUtil.getListBackground()
             if (value is PsiElement && !value.isValid) {
