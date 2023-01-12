@@ -1,9 +1,11 @@
 package com.viartemev.requestmapper
 
 import com.intellij.ide.actions.GotoActionBase
+import com.intellij.ide.util.gotoByName.ChooseByNameFilter
 import com.intellij.ide.util.gotoByName.ChooseByNamePopup
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys.PROJECT
+import com.intellij.openapi.actionSystem.CustomShortcutSet
 import com.intellij.openapi.project.DumbAware
 import com.viartemev.requestmapper.extensions.Extensions
 
@@ -15,7 +17,11 @@ class GoToRequestMappingAction : GotoActionBase(), DumbAware {
         showNavigationPopup(e, requestMappingModel, GoToRequestMappingActionCallback(), null, true, false)
     }
 
-    private class GoToRequestMappingActionCallback : GotoActionBase.GotoActionCallback<String>() {
+    private class GoToRequestMappingActionCallback : GotoActionCallback<String>() {
+        override fun createFilter(popup: ChooseByNamePopup): ChooseByNameFilter<String>? {
+            popup.setCheckBoxShortcut(CustomShortcutSet.EMPTY)
+            return null
+        }
 
         override fun elementChosen(popup: ChooseByNamePopup, element: Any) {
             if (element is RequestMappingItem && element.canNavigate()) {

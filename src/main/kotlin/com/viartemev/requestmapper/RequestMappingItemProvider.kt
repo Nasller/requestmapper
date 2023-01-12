@@ -61,9 +61,7 @@ open class RequestMappingItemProvider : ChooseByNameItemProvider {
                     }, parameters
                 )
             }
-
             namesList.sortWith(compareBy { PopupPath(it) })
-
             indicator.checkCanceled()
             return namesList
         }

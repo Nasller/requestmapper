@@ -13,12 +13,11 @@ abstract class RequestMappingByNameContributor(
     private var navigationItems: List<RequestMappingItem> = emptyList()
 ) : ChooseByNameContributor {
 
-    abstract fun getAnnotationSearchers(annotationName: String, project: Project): Sequence<PsiAnnotation>
+    abstract fun getAnnotationSearchers(annotationName: String, project: Project, includeNonProjectItems: Boolean): Sequence<PsiAnnotation>
 
     override fun getNames(project: Project, includeNonProjectItems: Boolean): Array<String> {
         navigationItems = supportedAnnotations
-            .flatMap { annotation -> findRequestMappingItems(project, annotation) }
-
+            .flatMap { annotation -> findRequestMappingItems(project, annotation, includeNonProjectItems) }
         return navigationItems
             .map { it.name }
             .distinct()
@@ -31,9 +30,8 @@ abstract class RequestMappingByNameContributor(
             .toTypedArray()
     }
 
-    private fun findRequestMappingItems(project: Project, annotationName: String): List<RequestMappingItem> {
-        return getAnnotationSearchers(annotationName, project)
-            .filterNotNull()
+    private fun findRequestMappingItems(project: Project, annotationName: String, includeNonProjectItems: Boolean): List<RequestMappingItem> {
+        return getAnnotationSearchers(annotationName, project, includeNonProjectItems)
             .filter { it.isMethodAnnotation() }
             .map { annotation -> mappingAnnotation(annotationName, annotation) }
             .flatMap { mappingAnnotation -> mappingAnnotation.values().asSequence() }
