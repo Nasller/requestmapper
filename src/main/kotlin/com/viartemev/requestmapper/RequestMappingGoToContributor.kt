@@ -55,17 +55,13 @@ class RequestMappingGoToContributor(event: AnActionEvent) : AbstractGotoSEContri
             override fun getListCellRendererComponent(list: JList<*>, value: Any, index: Int, isSelected: Boolean, cellHasFocus: Boolean): Component {
                 if (value !is RequestMappingItem) return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus)
                 removeAll()
-                val matchers = getItemMatchers(list, value)
-                val presentation = value.presentation
-                val containingFile = value.targetElement.containingFile
-                val bgColor = if (isSelected) UIUtil.getListSelectionBackground(true) else EditorTabPresentationUtil.getFileBackgroundColor(containingFile.project, containingFile.virtualFile)
-                val locationLabel = JLabel(presentation.locationString, value.targetElement.getIcon(Iconable.ICON_FLAG_READ_STATUS), SwingConstants.RIGHT)
-                locationLabel.horizontalTextPosition = SwingConstants.LEFT
-                locationLabel.foreground = if (isSelected) UIUtil.getListSelectionForeground(true) else UIUtil.getInactiveTextColor()
-                add(locationLabel, BorderLayout.EAST)
-                background = bgColor
-                val leftRenderer = RequestMappingModel.MyLeftRenderer(matchers.nameMatcher)
-                add(leftRenderer.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus), BorderLayout.WEST)
+                val component = RequestMappingModel.MyLeftRenderer(getItemMatchers(list, value).nameMatcher).getListCellRendererComponent(list, value, index, isSelected, cellHasFocus)
+                add(component, BorderLayout.WEST)
+                background = component.background
+                add(JLabel(value.presentation.locationString, value.targetElement.getIcon(Iconable.ICON_FLAG_READ_STATUS), SwingConstants.RIGHT).apply {
+                    horizontalTextPosition = SwingConstants.LEFT
+                    foreground = if (isSelected) UIUtil.getListSelectionForeground(true) else UIUtil.getInactiveTextColor()
+                }, BorderLayout.EAST)
                 return this
             }
         }

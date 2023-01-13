@@ -1,5 +1,6 @@
 package com.viartemev.requestmapper
 
+import com.intellij.credentialStore.RememberCheckBoxState.isSelected
 import com.intellij.ide.IdeBundle
 import com.intellij.ide.util.NavigationItemListCellRenderer
 import com.intellij.ide.util.PropertiesComponent
@@ -13,6 +14,7 @@ import com.intellij.navigation.NavigationItem
 import com.intellij.navigation.NavigationItemFileStatus
 import com.intellij.navigation.PsiElementNavigationItem
 import com.intellij.openapi.editor.markup.EffectType
+import com.intellij.openapi.editor.markup.TextAttributes
 import com.intellij.openapi.project.DumbAware
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Iconable
@@ -21,10 +23,7 @@ import com.intellij.openapi.vfs.newvfs.VfsPresentationUtil
 import com.intellij.problems.WolfTheProblemSolver
 import com.intellij.psi.PsiElement
 import com.intellij.psi.util.PsiUtilCore
-import com.intellij.ui.ColoredListCellRenderer
-import com.intellij.ui.IdeUICustomization
-import com.intellij.ui.JBColor
-import com.intellij.ui.SimpleTextAttributes
+import com.intellij.ui.*
 import com.intellij.ui.speedSearch.SpeedSearchUtil
 import com.intellij.util.IconUtil
 import com.intellij.util.text.Matcher
@@ -32,6 +31,7 @@ import com.intellij.util.text.MatcherHolder
 import com.intellij.util.ui.UIUtil
 import java.awt.BorderLayout
 import java.awt.Component
+import java.awt.Font
 import javax.swing.*
 
 class RequestMappingModel(project: Project, contributors: List<ChooseByNameContributor>) : FilteringGotoByModel<LanguageRef>(project, contributors), DumbAware {
@@ -65,15 +65,13 @@ class RequestMappingModel(project: Project, contributors: List<ChooseByNameContr
             override fun getListCellRendererComponent(list: JList<*>, value: Any, index: Int, isSelected: Boolean, cellHasFocus: Boolean): Component {
                 if (value !is RequestMappingItem) return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus)
                 removeAll()
-                val left = MyLeftRenderer(MatcherHolder.getAssociatedMatcher(list))
-                val leftCellRendererComponent = left.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus)
-                (leftCellRendererComponent as JComponent).isOpaque = false
-                add(leftCellRendererComponent, BorderLayout.WEST)
-                background = leftCellRendererComponent.background
-                val locationLabel = JLabel(value.presentation.locationString, value.targetElement.getIcon(Iconable.ICON_FLAG_READ_STATUS), SwingConstants.RIGHT)
-                locationLabel.horizontalTextPosition = SwingConstants.LEFT
-                locationLabel.foreground = if (isSelected) UIUtil.getListSelectionForeground(true) else UIUtil.getInactiveTextColor()
-                add(locationLabel, BorderLayout.EAST)
+                val component = MyLeftRenderer(MatcherHolder.getAssociatedMatcher(list)).getListCellRendererComponent(list, value, index, isSelected, cellHasFocus)
+                add(component, BorderLayout.WEST)
+                background = component.background
+                add(JLabel(value.presentation.locationString, value.targetElement.getIcon(Iconable.ICON_FLAG_READ_STATUS), SwingConstants.RIGHT).apply {
+                    horizontalTextPosition = SwingConstants.LEFT
+                    foreground = if (isSelected) UIUtil.getListSelectionForeground(true) else UIUtil.getInactiveTextColor()
+                }, BorderLayout.EAST)
                 return this
             }
         }
@@ -85,40 +83,27 @@ class RequestMappingModel(project: Project, contributors: List<ChooseByNameContr
             if (value is PsiElement && !value.isValid) {
                 icon = IconUtil.getEmptyIcon(false)
                 append(LangBundle.message("label.invalid"), SimpleTextAttributes.ERROR_ATTRIBUTES)
-            } else if (value is NavigationItem) {
+            } else if (value is PsiElementNavigationItem) {
                 val presentation = value.presentation ?: error("PSI elements displayed in choose by name lists must return a non-null value from getPresentation(): element $value, class ${value.javaClass.name}")
                 val name = presentation.presentableText ?: error("PSI elements displayed in choose by name lists must return a non-null value from getPresentation().getPresentableName: element $value, class ${value.javaClass.name}")
-                var color = list.foreground
-                var isProblemFile = if (value is PsiElement) {
-                    val project = (value as PsiElement).project
-                    val virtualFile = PsiUtilCore.getVirtualFile(value as PsiElement)
-                    virtualFile != null && WolfTheProblemSolver.getInstance(project).isProblemFile(virtualFile)
-                } else false
-                val psiElement = getPsiElement(value)
+                val textAttributes = NodeRenderer.getSimpleTextAttributes(presentation).toTextAttributes()
+                val psiElement = value.targetElement
                 if (psiElement != null && psiElement.isValid) {
                     val project = psiElement.project
-                    val virtualFile = PsiUtilCore.getVirtualFile(psiElement)
-                    isProblemFile = virtualFile != null && WolfTheProblemSolver.getInstance(project).isProblemFile(virtualFile)
-                    val fileColor = if (virtualFile == null) null else VfsPresentationUtil.getFileBackgroundColor(project, virtualFile)
-                    if (fileColor != null) {
-                        bgColor = fileColor
+                    PsiUtilCore.getVirtualFile(psiElement)?.let {
+                        VfsPresentationUtil.getFileBackgroundColor(project, it)?.apply { bgColor = this }
+                        if (WolfTheProblemSolver.getInstance(project).isProblemFile(it)) {
+                            textAttributes.effectType = EffectType.WAVE_UNDERSCORE
+                            textAttributes.effectColor = JBColor.red
+                        }
                     }
                 }
                 val status = NavigationItemFileStatus.get(value)
-                if (status !== FileStatus.NOT_CHANGED) {
-                    color = status.color
-                }
-                val textAttributes = NodeRenderer.getSimpleTextAttributes(presentation).toTextAttributes()
-                if (isProblemFile) {
-                    textAttributes.effectType = EffectType.WAVE_UNDERSCORE
-                    textAttributes.effectColor = JBColor.red
-                }
-                textAttributes.foregroundColor = color
-                val nameAttributes = SimpleTextAttributes.fromTextAttributes(textAttributes)
+                textAttributes.foregroundColor = if (status !== FileStatus.NOT_CHANGED) status.color else list.foreground
                 if(presentation is RequestMappingItem.RequestMappingItemPresentation) {
-                    append("${presentation.getRequestMethod()}  ",nameAttributes)
+                    append("${presentation.getRequestMethod()}  ",getMethodSimpleTextAttributes(presentation.getRequestMethod(),textAttributes))
                 }
-                SpeedSearchUtil.appendColoredFragmentForMatcher(name, this, nameAttributes, myMatcher, bgColor, selected)
+                SpeedSearchUtil.appendColoredFragmentForMatcher(name, this, SimpleTextAttributes.fromTextAttributes(textAttributes), myMatcher, bgColor, selected)
                 icon = presentation.getIcon(false)
             } else {
                 icon = IconUtil.getEmptyIcon(false)
@@ -130,9 +115,23 @@ class RequestMappingModel(project: Project, contributors: List<ChooseByNameContr
     }
 
     private companion object{
-        @JvmStatic
-        private fun getPsiElement(o: Any?): PsiElement? {
-            return if (o is PsiElement) o else if (o is PsiElementNavigationItem) o.targetElement else null
+        private val DELETE = ColorUtil.fromHex("#F93E3E")
+        private val GET = ColorUtil.fromHex("#61AFFE")
+        private val PUT = ColorUtil.fromHex("#FCA130")
+        private val POST = ColorUtil.fromHex("#49CC90")
+
+        private fun getMethodSimpleTextAttributes(method: String,textAttributes: TextAttributes) : SimpleTextAttributes {
+            val attributes = TextAttributes()
+            attributes.copyFrom(textAttributes)
+            attributes.fontType = Font.BOLD
+            attributes.foregroundColor = when(method){
+                "DELETE" -> DELETE
+                "GET" -> GET
+                "PUT" -> PUT
+                "POST" -> POST
+                else -> attributes.foregroundColor
+            }
+            return SimpleTextAttributes.fromTextAttributes(attributes)
         }
     }
 }
