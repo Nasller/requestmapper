@@ -1,6 +1,5 @@
 package com.viartemev.requestmapper
 
-import com.intellij.credentialStore.RememberCheckBoxState.isSelected
 import com.intellij.ide.IdeBundle
 import com.intellij.ide.util.NavigationItemListCellRenderer
 import com.intellij.ide.util.PropertiesComponent
@@ -32,7 +31,10 @@ import com.intellij.util.ui.UIUtil
 import java.awt.BorderLayout
 import java.awt.Component
 import java.awt.Font
-import javax.swing.*
+import javax.swing.JLabel
+import javax.swing.JList
+import javax.swing.ListCellRenderer
+import javax.swing.SwingConstants
 
 class RequestMappingModel(project: Project, contributors: List<ChooseByNameContributor>) : FilteringGotoByModel<LanguageRef>(project, contributors), DumbAware {
 
