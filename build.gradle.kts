@@ -47,6 +47,10 @@ kotlin {
 }
 
 tasks {
+    runIde {
+        systemProperties["idea.is.internal"] = true
+    }
+
     // Set the JVM compatibility versions
     properties("javaVersion").let {
         withType<JavaCompile> {
