@@ -31,9 +31,12 @@
     <depends optional="true" config-file="pluginKotlin.xml">org.jetbrains.kotlin</depends>
 
     <actions>
-        <action id="GoToRequestMapping" class="com.viartemev.requestmapper.GoToRequestMappingAction" text="Request Mapping" description="Request mapping">
+        <action id="GoToRequestMapping" class="com.viartemev.requestmapper.actions.GoToRequestMappingAction" text="Request Mapping...">
             <add-to-group group-id="GoToTargetEx" anchor="last"/>
             <keyboard-shortcut keymap="$default" first-keystroke="ctrl BACK_SLASH"/>
+        </action>
+        <action id="RequestMappingSearchEveryWhereAction" class="com.viartemev.requestmapper.actions.RequestMappingSearchEveryWhereAction" text="Request Mapping SearchEveryWhere">
+            <keyboard-shortcut keymap="$default" first-keystroke="ctrl shift alt BACK_SLASH"/>
         </action>
     </actions>
 

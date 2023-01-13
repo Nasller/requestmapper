@@ -38,7 +38,7 @@ class RequestMappingModel(project: Project, contributors: List<ChooseByNameContr
 
     override fun getItemProvider(context: PsiElement?): ChooseByNameItemProvider = RequestMappingItemProvider()
 
-    override fun filterValueFor(item: NavigationItem): LanguageRef? = LanguageRef.forNavigationitem(item)
+    override fun filterValueFor(item: NavigationItem): LanguageRef? = (item as? RequestMappingItem)?.let { item.targetElement.language.let { LanguageRef.forLanguage(it) } }
 
     override fun getPromptText(): String = "Enter mapping url"
 
@@ -58,7 +58,7 @@ class RequestMappingModel(project: Project, contributors: List<ChooseByNameContr
 
     override fun getFullName(element: Any): String? = getElementName(element)
 
-    override fun willOpenEditor(): Boolean = false
+    override fun willOpenEditor(): Boolean = true
 
     override fun getListCellRenderer(): ListCellRenderer<*> {
         return object : NavigationItemListCellRenderer() {
@@ -86,14 +86,8 @@ class RequestMappingModel(project: Project, contributors: List<ChooseByNameContr
                 icon = IconUtil.getEmptyIcon(false)
                 append(LangBundle.message("label.invalid"), SimpleTextAttributes.ERROR_ATTRIBUTES)
             } else if (value is NavigationItem) {
-                val presentation = value.presentation ?: error(
-                    "PSI elements displayed in choose by name lists must return a non-null value from getPresentation(): element " +
-                            value + ", class " + value.javaClass.name
-                )
-                val name = presentation.presentableText ?: error(
-                    "PSI elements displayed in choose by name lists must return a non-null value from getPresentation().getPresentableName: element " +
-                            value + ", class " + value.javaClass.name
-                )
+                val presentation = value.presentation ?: error("PSI elements displayed in choose by name lists must return a non-null value from getPresentation(): element $value, class ${value.javaClass.name}")
+                val name = presentation.presentableText ?: error("PSI elements displayed in choose by name lists must return a non-null value from getPresentation().getPresentableName: element $value, class ${value.javaClass.name}")
                 var color = list.foreground
                 var isProblemFile = if (value is PsiElement) {
                     val project = (value as PsiElement).project
@@ -121,6 +115,9 @@ class RequestMappingModel(project: Project, contributors: List<ChooseByNameContr
                 }
                 textAttributes.foregroundColor = color
                 val nameAttributes = SimpleTextAttributes.fromTextAttributes(textAttributes)
+                if(presentation is RequestMappingItem.RequestMappingItemPresentation) {
+                    append("${presentation.getRequestMethod()}  ",nameAttributes)
+                }
                 SpeedSearchUtil.appendColoredFragmentForMatcher(name, this, nameAttributes, myMatcher, bgColor, selected)
                 icon = presentation.getIcon(false)
             } else {

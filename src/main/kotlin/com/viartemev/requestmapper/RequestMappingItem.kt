@@ -13,7 +13,7 @@ class RequestMappingItem(private val psiElement: PsiElement, private val urlPath
 
     override fun getName(): String = this.requestMethod + " " + this.urlPath
 
-    override fun getPresentation(): ItemPresentation = RequestMappingItemPresentation()
+    override fun getPresentation(): ItemPresentation = RequestMappingItemPresentation(this)
 
     override fun getTargetElement(): PsiElement = psiElement
 
@@ -27,16 +27,15 @@ class RequestMappingItem(private val psiElement: PsiElement, private val urlPath
         return "RequestMappingItem(psiElement=$psiElement, urlPath='$urlPath', requestMethod='$requestMethod', navigationElement=$navigationElement)"
     }
 
-    internal inner class RequestMappingItemPresentation : ItemPresentation {
+    internal class RequestMappingItemPresentation(private val item: RequestMappingItem) : ItemPresentation {
+        fun getRequestMethod() = item.requestMethod
 
-        override fun getPresentableText() = this@RequestMappingItem.requestMethod + " " + this@RequestMappingItem.urlPath
+        override fun getPresentableText() = item.urlPath
 
         override fun getLocationString(): String {
-            val psiElement = this@RequestMappingItem.psiElement
-            val fileName = psiElement.containingFile?.name
-            return when (psiElement) {
-                is PsiMethod -> (psiElement.containingClass?.name ?: fileName ?: "unknownFile") + "." + psiElement.name
-                is PsiClass -> psiElement.name ?: fileName ?: "unknownFile"
+            return when (val psiElement = item.psiElement) {
+                is PsiMethod -> (psiElement.containingClass?.name ?: psiElement.containingFile?.name ?: "unknownFile") + "." + psiElement.name
+                is PsiClass -> psiElement.name ?: psiElement.containingFile?.name ?: "unknownFile"
                 else -> "unknownLocation"
             }
         }
