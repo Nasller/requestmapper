@@ -28,6 +28,7 @@ import com.intellij.util.IconUtil
 import com.intellij.util.text.Matcher
 import com.intellij.util.text.MatcherHolder
 import com.intellij.util.ui.UIUtil
+import com.viartemev.requestmapper.annotations.MappingAnnotation
 import java.awt.BorderLayout
 import java.awt.Component
 import java.awt.Font
@@ -127,10 +128,10 @@ class RequestMappingModel(project: Project, contributors: List<ChooseByNameContr
             attributes.copyFrom(textAttributes)
             attributes.fontType = Font.BOLD
             attributes.foregroundColor = when(method){
-                "DELETE" -> DELETE
-                "GET" -> GET
-                "PUT" -> PUT
-                "POST" -> POST
+                MappingAnnotation.DELETE_METHOD -> DELETE
+                MappingAnnotation.GET_METHOD -> GET
+                MappingAnnotation.PUT_METHOD -> PUT
+                MappingAnnotation.POST_METHOD -> POST
                 else -> attributes.foregroundColor
             }
             return SimpleTextAttributes.fromTextAttributes(attributes)

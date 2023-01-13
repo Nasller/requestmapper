@@ -2,32 +2,22 @@ package com.viartemev.requestmapper.annotations
 
 import com.intellij.psi.PsiAnnotation
 import com.viartemev.requestmapper.RequestMappingItem
-import com.viartemev.requestmapper.annotations.jaxrs.DELETE
-import com.viartemev.requestmapper.annotations.jaxrs.GET
-import com.viartemev.requestmapper.annotations.jaxrs.HEAD
-import com.viartemev.requestmapper.annotations.jaxrs.OPTIONS
-import com.viartemev.requestmapper.annotations.jaxrs.PATCH
-import com.viartemev.requestmapper.annotations.jaxrs.POST
-import com.viartemev.requestmapper.annotations.jaxrs.PUT
-import com.viartemev.requestmapper.annotations.micronaut.Delete
-import com.viartemev.requestmapper.annotations.micronaut.Get
-import com.viartemev.requestmapper.annotations.micronaut.Head
-import com.viartemev.requestmapper.annotations.micronaut.Options
-import com.viartemev.requestmapper.annotations.micronaut.Patch
-import com.viartemev.requestmapper.annotations.micronaut.Post
-import com.viartemev.requestmapper.annotations.micronaut.Put
-import com.viartemev.requestmapper.annotations.spring.DeleteMapping
-import com.viartemev.requestmapper.annotations.spring.GetMapping
-import com.viartemev.requestmapper.annotations.spring.PatchMapping
-import com.viartemev.requestmapper.annotations.spring.PostMapping
-import com.viartemev.requestmapper.annotations.spring.PutMapping
-import com.viartemev.requestmapper.annotations.spring.RequestMapping
+import com.viartemev.requestmapper.annotations.jaxrs.*
+import com.viartemev.requestmapper.annotations.micronaut.*
+import com.viartemev.requestmapper.annotations.spring.*
 
 interface MappingAnnotation {
-
     fun values(): List<RequestMappingItem>
 
     companion object {
+        const val GET_METHOD = "GET"
+        const val POST_METHOD = "POST"
+        const val PUT_METHOD = "PUT"
+        const val PATCH_METHOD = "PATCH"
+        const val DELETE_METHOD = "DELETE"
+        const val HEAD_METHOD = "HEAD"
+        const val OPTIONS_METHOD = "OPTIONS"
+
         val supportedAnnotations = listOf(
             RequestMapping::class.java.simpleName,
             GetMapping::class.java.simpleName,
