@@ -1,5 +1,7 @@
-package com.viartemev.requestmapper.contributor
+package com.viartemev.requestmapper.contributors
 
+import com.intellij.ide.util.gotoByName.LanguageRef
+import com.intellij.lang.java.JavaLanguage
 import com.intellij.psi.PsiAnnotation
 import com.intellij.psi.impl.java.stubs.index.JavaAnnotationIndex
 import com.intellij.psi.search.GlobalSearchScope
@@ -12,4 +14,6 @@ class JavaRequestMappingContributor : RequestMappingByNameContributor() {
             .get(annotationName, project, scope)
             .asSequence()
     }
+
+    override fun getLanguageRef(): LanguageRef = LanguageRef.forLanguage(JavaLanguage.INSTANCE)
 }

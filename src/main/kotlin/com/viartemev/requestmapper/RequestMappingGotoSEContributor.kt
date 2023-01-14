@@ -10,17 +10,17 @@ import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.project.Project
 import com.intellij.util.text.MatcherHolder
 import com.viartemev.requestmapper.RequestMappingModel.Companion.addLocationLabel
-import com.viartemev.requestmapper.extensions.Extensions
+import com.viartemev.requestmapper.contributors.RequestMappingContributor
 import java.awt.BorderLayout
 import java.awt.Component
 import javax.swing.JList
 import javax.swing.ListCellRenderer
 
-class RequestMappingSearchEverywhereContributor(event: AnActionEvent) : AbstractGotoSEContributor(event) {
+class RequestMappingGotoSEContributor(event: AnActionEvent) : AbstractGotoSEContributor(event) {
     val project: Project = myProject
     private val myFilter: PersistentSearchEverywhereContributorFilter<LanguageRef>
     init {
-        val items = LanguageRef.forAllLanguages()
+        val items = RequestMappingContributor.getExtensions().map(RequestMappingContributor::getLanguageRef)
         val persistentConfig = GotoClassSymbolConfiguration.getInstance(myProject)
         myFilter = PersistentSearchEverywhereContributorFilter(items, persistentConfig, LanguageRef::displayName, LanguageRef::icon)
     }
@@ -28,7 +28,7 @@ class RequestMappingSearchEverywhereContributor(event: AnActionEvent) : Abstract
     override fun getSearchProviderId(): String = SearchProviderId
 
     override fun createModel(project: Project): FilteringGotoByModel<*> {
-        val model = RequestMappingModel(project, Extensions.getExtensions())
+        val model = RequestMappingModel(project, RequestMappingContributor.getExtensions())
         model.setFilterItems(myFilter.selectedElements)
         return model
     }
@@ -70,7 +70,7 @@ class RequestMappingSearchEverywhereContributor(event: AnActionEvent) : Abstract
 
     class Factory : SearchEverywhereContributorFactory<Any> {
         override fun createContributor(initEvent: AnActionEvent): SearchEverywhereContributor<Any> {
-            return RequestMappingSearchEverywhereContributor(initEvent)
+            return RequestMappingGotoSEContributor(initEvent)
         }
     }
 }

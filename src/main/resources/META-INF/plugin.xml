@@ -40,14 +40,14 @@
     </actions>
 
     <extensionPoints>
-        <extensionPoint name="requestMappingContributor" interface="com.intellij.navigation.ChooseByNameContributorEx"/>
+        <extensionPoint name="requestMappingContributor" interface="com.viartemev.requestmapper.contributors.RequestMappingContributor"/>
     </extensionPoints>
 
     <extensions defaultExtensionNs="com.intellij">
-        <searchEverywhereContributor implementation="com.viartemev.requestmapper.RequestMappingSearchEverywhereContributor$Factory"/>
+        <searchEverywhereContributor implementation="com.viartemev.requestmapper.RequestMappingGotoSEContributor$Factory"/>
     </extensions>
 
     <extensions defaultExtensionNs="com.viartemev.requestmapper">
-        <requestMappingContributor implementation="com.viartemev.requestmapper.contributor.JavaRequestMappingContributor"/>
+        <requestMappingContributor implementation="com.viartemev.requestmapper.contributors.JavaRequestMappingContributor"/>
     </extensions>
 </idea-plugin>

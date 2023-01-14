@@ -44,6 +44,7 @@ interface MappingAnnotation {
             Put::class.java.simpleName
         )
 
+        @JvmStatic
         fun mappingAnnotation(annotationName: String, psiAnnotation: PsiAnnotation): MappingAnnotation {
             return when (annotationName) {
                 RequestMapping::class.java.simpleName -> RequestMapping(psiAnnotation)

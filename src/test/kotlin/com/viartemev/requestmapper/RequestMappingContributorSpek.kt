@@ -1,10 +1,12 @@
 package com.viartemev.requestmapper
 
+import com.intellij.ide.util.gotoByName.LanguageRef
+import com.intellij.lang.java.JavaLanguage
 import com.intellij.openapi.command.impl.DummyProject
 import com.intellij.openapi.project.Project
 import com.intellij.psi.*
 import com.intellij.psi.search.GlobalSearchScope
-import com.viartemev.requestmapper.contributor.RequestMappingByNameContributor
+import com.viartemev.requestmapper.contributors.RequestMappingByNameContributor
 import org.amshove.kluent.shouldBeEqualTo
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
@@ -17,8 +19,8 @@ object RequestMappingContributorSpek : Spek({
         context("getItemsByName on empty navigationItems list") {
             it("should return empty list") {
                 val contributor = object : RequestMappingByNameContributor() {
-                    override fun getAnnotationSearchers(annotationName: String, scope: GlobalSearchScope): Sequence<PsiAnnotation> =
-                        emptySequence()
+                    override fun getAnnotationSearchers(annotationName: String, scope: GlobalSearchScope): Sequence<PsiAnnotation> = emptySequence()
+                    override fun getLanguageRef(): LanguageRef = LanguageRef.forLanguage(JavaLanguage.INSTANCE)
                 }
                 contributor.getItemsByName("name", "pattern", DummyProject.getInstance(), false).size shouldBeEqualTo 0
             }
@@ -31,8 +33,8 @@ object RequestMappingContributorSpek : Spek({
                     RequestMappingItem(psiElement, "", "/api/v2/users", "GET")
                 )
                 val contributor = object : RequestMappingByNameContributor(navigationItems) {
-                    override fun getAnnotationSearchers(annotationName: String, scope: GlobalSearchScope): Sequence<PsiAnnotation> =
-                        emptySequence()
+                    override fun getAnnotationSearchers(annotationName: String, scope: GlobalSearchScope): Sequence<PsiAnnotation> = emptySequence()
+                    override fun getLanguageRef(): LanguageRef = LanguageRef.forLanguage(JavaLanguage.INSTANCE)
                 }
                 val itemsByName = contributor.getItemsByName("GET /api/v1/users", "pattern", DummyProject.getInstance(), false)
                 itemsByName.size shouldBeEqualTo 1
@@ -42,8 +44,8 @@ object RequestMappingContributorSpek : Spek({
         context("getNames on empty navigationItems list") {
             it("should return empty list") {
                 val contributor = object : RequestMappingByNameContributor() {
-                    override fun getAnnotationSearchers(annotationName: String, scope: GlobalSearchScope): Sequence<PsiAnnotation> =
-                        emptySequence()
+                    override fun getAnnotationSearchers(annotationName: String, scope: GlobalSearchScope): Sequence<PsiAnnotation> = emptySequence()
+                    override fun getLanguageRef(): LanguageRef = LanguageRef.forLanguage(JavaLanguage.INSTANCE)
                 }
                 contributor.getNames(DummyProject.getInstance(), false).size shouldBeEqualTo 0
             }
@@ -55,8 +57,8 @@ object RequestMappingContributorSpek : Spek({
                     on { parent } doReturn annotationParent
                 }
                 val contributor = object : RequestMappingByNameContributor() {
-                    override fun getAnnotationSearchers(annotationName: String, scope: GlobalSearchScope): Sequence<PsiAnnotation> =
-                        sequenceOf(psiAnnotation)
+                    override fun getAnnotationSearchers(annotationName: String, scope: GlobalSearchScope): Sequence<PsiAnnotation> = sequenceOf(psiAnnotation)
+                    override fun getLanguageRef(): LanguageRef = LanguageRef.forLanguage(JavaLanguage.INSTANCE)
                 }
                 contributor.getNames(DummyProject.getInstance(), false).size shouldBeEqualTo 0
             }
@@ -88,8 +90,8 @@ object RequestMappingContributorSpek : Spek({
                 }
                 val annotationSearcher: (String, Project) -> Sequence<PsiAnnotation> = { name: String, _ -> if (name == "RequestMapping") sequenceOf(annotation) else emptySequence() }
                 val contributor = object : RequestMappingByNameContributor() {
-                    override fun getAnnotationSearchers(annotationName: String, scope: GlobalSearchScope): Sequence<PsiAnnotation> =
-                        annotationSearcher(annotationName, scope.project!!)
+                    override fun getAnnotationSearchers(annotationName: String, scope: GlobalSearchScope): Sequence<PsiAnnotation> = annotationSearcher(annotationName, scope.project!!)
+                    override fun getLanguageRef(): LanguageRef = LanguageRef.forLanguage(JavaLanguage.INSTANCE)
                 }
                 val names = contributor.getNames(DummyProject.getInstance(), false)
                 names.size shouldBeEqualTo 1

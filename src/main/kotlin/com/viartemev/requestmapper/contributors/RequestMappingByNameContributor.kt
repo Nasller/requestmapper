@@ -1,8 +1,6 @@
-package com.viartemev.requestmapper.contributor
+package com.viartemev.requestmapper.contributors
 
-import com.intellij.navigation.ChooseByNameContributorEx
 import com.intellij.navigation.NavigationItem
-import com.intellij.psi.PsiAnnotation
 import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.util.Processor
 import com.intellij.util.containers.ContainerUtil
@@ -13,15 +11,10 @@ import com.viartemev.requestmapper.annotations.MappingAnnotation.Companion.mappi
 import com.viartemev.requestmapper.annotations.MappingAnnotation.Companion.supportedAnnotations
 import com.viartemev.requestmapper.utils.isMethodAnnotation
 
-abstract class RequestMappingByNameContributor(
-    private var navigationItems: List<RequestMappingItem> = emptyList()
-) : ChooseByNameContributorEx {
-
-    abstract fun getAnnotationSearchers(annotationName: String, scope: GlobalSearchScope): Sequence<PsiAnnotation>
+abstract class RequestMappingByNameContributor(private var navigationItems: List<RequestMappingItem> = emptyList()) : RequestMappingContributor {
 
     override fun processNames(processor: Processor<in String>, scope: GlobalSearchScope, filter: IdFilter?) {
-        navigationItems = supportedAnnotations
-            .flatMap { annotation -> findRequestMappingItems(annotation, scope) }
+        navigationItems = supportedAnnotations.flatMap { annotation -> findRequestMappingItems(annotation, scope) }
         ContainerUtil.process(navigationItems.map { it.name }.distinct().toTypedArray(), processor)
     }
 

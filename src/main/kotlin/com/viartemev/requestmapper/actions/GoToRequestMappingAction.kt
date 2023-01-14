@@ -9,12 +9,14 @@ import com.intellij.openapi.actionSystem.CustomShortcutSet
 import com.intellij.openapi.project.DumbAware
 import com.viartemev.requestmapper.RequestMappingItem
 import com.viartemev.requestmapper.RequestMappingModel
-import com.viartemev.requestmapper.extensions.Extensions
+import com.viartemev.requestmapper.contributors.RequestMappingContributor
 
 class GoToRequestMappingAction : GotoActionBase(), DumbAware {
     override fun gotoActionPerformed(e: AnActionEvent) {
         val project = e.getData(PROJECT) ?: return
-        val requestMappingModel = RequestMappingModel(project, Extensions.getExtensions())
+        val contributors = RequestMappingContributor.getExtensions()
+        val requestMappingModel = RequestMappingModel(project, contributors)
+        requestMappingModel.setFilterItems(contributors.map(RequestMappingContributor::getLanguageRef))
         showNavigationPopup(e, requestMappingModel, object : GotoActionCallback<String>() {
             override fun createFilter(popup: ChooseByNamePopup): ChooseByNameFilter<String>? {
                 popup.setCheckBoxShortcut(CustomShortcutSet.EMPTY)
