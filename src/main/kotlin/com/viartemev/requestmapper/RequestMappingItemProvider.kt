@@ -1,87 +1,81 @@
 package com.viartemev.requestmapper
 
+import com.intellij.ide.actions.searcheverywhere.FoundItemDescriptor
 import com.intellij.ide.util.gotoByName.*
 import com.intellij.openapi.progress.ProgressIndicator
+import com.intellij.openapi.progress.ProgressManager
+import com.intellij.psi.PsiElement
+import com.intellij.psi.codeStyle.MinusculeMatcher
 import com.intellij.psi.codeStyle.NameUtil
 import com.intellij.util.Processor
-import com.intellij.util.SmartList
 import com.intellij.util.SynchronizedCollectConsumer
 import com.intellij.util.containers.ContainerUtil
 import com.intellij.util.indexing.FindSymbolParameters
-import com.viartemev.requestmapper.model.PopupPath
-import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap
-import kotlin.text.MatchResult
 
-open class RequestMappingItemProvider : ChooseByNameItemProvider {
-    override fun filterNames(base: ChooseByNameViewModel, names: Array<out String>, pattern: String): List<String> = emptyList()
+class RequestMappingItemProvider (context: PsiElement?) : DefaultChooseByNameItemProvider(context) {
 
-    override fun filterElements(base: ChooseByNameViewModel, pattern: String, everywhere: Boolean, indicator: ProgressIndicator, consumer: Processor<Any>): Boolean {
-        base.project?.putUserData(ChooseByNamePopup.CURRENT_SEARCH_PATTERN, pattern)
-        val parameters = FindSymbolParameters(pattern, pattern, FindSymbolParameters.searchScopeFor(base.project, everywhere))
-        val namesList = getSortedResults(base, pattern, indicator, parameters)
-        indicator.checkCanceled()
-        return processByNames(base, everywhere, indicator, consumer, namesList, parameters)
+    override fun filterElementsWithWeights(base: ChooseByNameViewModel, parameters: FindSymbolParameters, indicator: ProgressIndicator, consumer: Processor<in FoundItemDescriptor<*>?>): Boolean {
+        return ProgressManager.getInstance().computePrioritized<Boolean, RuntimeException> { filter(base, parameters, indicator, consumer) }
     }
 
-
     companion object {
-        private fun getSortedResults(base: ChooseByNameViewModel, pattern: String, indicator: ProgressIndicator, parameters: FindSymbolParameters): List<String> {
+        private fun filter(base: ChooseByNameViewModel, parameters: FindSymbolParameters, indicator: ProgressIndicator, consumer: Processor<in FoundItemDescriptor<*>?>): Boolean {
+            base.project?.putUserData(ChooseByNamePopup.CURRENT_SEARCH_PATTERN, parameters.completePattern)
+            val namesList = getSortedResults(base, indicator, parameters)
+            indicator.checkCanceled()
+            return processByNames(base, indicator, consumer, namesList, parameters)
+        }
+
+        private fun getSortedResults(base: ChooseByNameViewModel, indicator: ProgressIndicator, parameters: FindSymbolParameters): List<FoundItemDescriptor<String>> {
+            val pattern = parameters.completePattern
             if (pattern.isEmpty() && !base.canShowListForEmptyPattern()) {
                 return emptyList()
             }
-            val namesList= ArrayList<String>()
-            val collect = SynchronizedCollectConsumer(namesList)
-            val model = base.model
-            if (model is ChooseByNameModelEx) {
+            val matcher = NameUtil.buildMatcher("*$pattern").build()
+            val itemsList = ArrayList<FoundItemDescriptor<String>>()
+            val collect = SynchronizedCollectConsumer(itemsList)
+            (base.model as? ChooseByNameModelEx)?.let {
                 indicator.checkCanceled()
-                model.processNames({
+                it.processNames({name ->
                     indicator.checkCanceled()
-                    val matches = matches(it, pattern)
-                    if (matches) collect.consume(it)
-                    return@processNames matches
+                    return@processNames matches(matcher, name, pattern)?.run {
+                        collect.consume(this)
+                        true
+                    } ?: false
                 }, parameters)
             }
-            namesList.sortWith(compareBy { PopupPath(it) })
+            itemsList.sortWith(Comparator.comparing(FoundItemDescriptor<String>::getWeight).reversed())
             indicator.checkCanceled()
-            return namesList
+            return itemsList
         }
 
-        private fun processByNames(base: ChooseByNameViewModel, everywhere: Boolean, indicator: ProgressIndicator, consumer: Processor<Any>, namesList: List<String>, parameters: FindSymbolParameters): Boolean {
-            val sameNameElements = SmartList<Any>()
-            val qualifierMatchResults = Reference2ObjectOpenHashMap<Any, MatchResult>()
+        private fun processByNames(base: ChooseByNameViewModel, indicator: ProgressIndicator, consumer: Processor<in FoundItemDescriptor<*>?>, itemsList: List<FoundItemDescriptor<String>>, parameters: FindSymbolParameters): Boolean {
             val model = base.model
-            for (name in namesList) {
+            for (item in itemsList) {
                 indicator.checkCanceled()
-                val elements = if (model is ContributorsBasedGotoByModel) model.getElementsByName(name, parameters, indicator)
-                else model.getElementsByName(name, everywhere, parameters.completePattern)
+                val elements = if (model is ContributorsBasedGotoByModel) model.getElementsByName(item.item, parameters, indicator)
+                else model.getElementsByName(item.item, parameters.isSearchInLibraries, parameters.completePattern)
                 if (elements.size > 1) {
-                    sameNameElements.clear()
-                    qualifierMatchResults.clear()
-                    for (element in elements) {
-                        indicator.checkCanceled()
-                        sameNameElements.add(element)
-                    }
-                    if (!ContainerUtil.process(sameNameElements, consumer)) return false
+                    if (!ContainerUtil.process(elements.map { FoundItemDescriptor(it, 0) }, consumer)) return false
                 } else if (elements.size == 1) {
-                    if (!consumer.process(elements[0])) return false
+                    if (!consumer.process(FoundItemDescriptor(elements[0], 0))) return false
                 }
             }
             return true
         }
 
-        fun matches(name: String?, pattern: String): Boolean {
-            if (name == null) {
-                return false
-            }
+        private fun matches(matcher: MinusculeMatcher, name: String?, pattern: String): FoundItemDescriptor<String>? {
+            if (name.isNullOrEmpty()) return null
             return try {
                 if (pattern == "/") {
-                    true
+                    FoundItemDescriptor(name,0)
                 } else {
-                    val (_, path) = name.split(" ", limit = 2)
-                    NameUtil.buildMatcher("*$pattern", NameUtil.MatchingCaseSensitivity.NONE).matches(path)
+                    if(matcher.matches(name)){
+                        FoundItemDescriptor(name, matcher.matchingDegree(name))
+                    } else null
                 }
-            } catch (e: Exception) {
-                false // no matches appears valid result for "bad" pattern
+            } catch (_: Exception) {
+                null // no matches appear valid result for "bad" pattern
             }
         }
     }

@@ -27,7 +27,7 @@ abstract class JaxRsMappingAnnotation(
     private fun fetchRequestMappingItem(psiMethod: PsiMethod, method: String): List<RequestMappingItem> {
         val classMapping = fetchMappingFromClass(psiMethod)
         val methodMapping = fetchMappingFromMethod(psiMethod)
-        return listOf(RequestMappingItem(psiMethod, urlFormatter.format(classMapping, methodMapping), method))
+        return listOf(RequestMappingItem(psiMethod, "", urlFormatter.format(classMapping, methodMapping), method))
     }
 
     private fun fetchMappingFromClass(psiMethod: PsiMethod): String {

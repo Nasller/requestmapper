@@ -44,7 +44,7 @@
     </extensionPoints>
 
     <extensions defaultExtensionNs="com.intellij">
-        <searchEverywhereContributor implementation="com.viartemev.requestmapper.RequestMappingGoToContributor$Factory"/>
+        <searchEverywhereContributor implementation="com.viartemev.requestmapper.RequestMappingSearchEverywhereContributor$Factory"/>
     </extensions>
 
     <extensions defaultExtensionNs="com.viartemev.requestmapper">

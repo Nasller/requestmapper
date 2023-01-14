@@ -7,11 +7,9 @@ import com.intellij.ide.util.gotoByName.ChooseByNameItemProvider
 import com.intellij.ide.util.gotoByName.FilteringGotoByModel
 import com.intellij.ide.util.gotoByName.LanguageRef
 import com.intellij.ide.util.treeView.NodeRenderer
-import com.intellij.lang.LangBundle
 import com.intellij.navigation.ChooseByNameContributorEx
 import com.intellij.navigation.NavigationItem
 import com.intellij.navigation.NavigationItemFileStatus
-import com.intellij.navigation.PsiElementNavigationItem
 import com.intellij.openapi.editor.markup.EffectType
 import com.intellij.openapi.editor.markup.TextAttributes
 import com.intellij.openapi.project.DumbAware
@@ -32,14 +30,11 @@ import com.viartemev.requestmapper.annotations.MappingAnnotation
 import java.awt.BorderLayout
 import java.awt.Component
 import java.awt.Font
-import javax.swing.JLabel
-import javax.swing.JList
-import javax.swing.ListCellRenderer
-import javax.swing.SwingConstants
+import javax.swing.*
 
 class RequestMappingModel(project: Project, contributors: List<ChooseByNameContributorEx>) : FilteringGotoByModel<LanguageRef>(project, contributors), DumbAware {
 
-    override fun getItemProvider(context: PsiElement?): ChooseByNameItemProvider = RequestMappingItemProvider()
+    override fun getItemProvider(context: PsiElement?): ChooseByNameItemProvider = RequestMappingItemProvider(context)
 
     override fun filterValueFor(item: NavigationItem): LanguageRef? = (item as? RequestMappingItem)?.let { item.targetElement.language.let { LanguageRef.forLanguage(it) } }
 
@@ -68,13 +63,11 @@ class RequestMappingModel(project: Project, contributors: List<ChooseByNameContr
             override fun getListCellRendererComponent(list: JList<*>, value: Any, index: Int, isSelected: Boolean, cellHasFocus: Boolean): Component {
                 if (value !is RequestMappingItem) return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus)
                 removeAll()
-                val component = MyLeftRenderer(MatcherHolder.getAssociatedMatcher(list)).getListCellRendererComponent(list, value, index, isSelected, cellHasFocus)
+                val component = MyLeftRenderer(MatcherHolder.getAssociatedMatcher(list))
+                    .getListCellRendererComponent(list, value, index, isSelected, cellHasFocus)
                 add(component, BorderLayout.WEST)
+                addLocationLabel(value, list, isSelected)
                 background = component.background
-                add(JLabel(value.presentation.locationString, value.targetElement.getIcon(Iconable.ICON_FLAG_READ_STATUS), SwingConstants.RIGHT).apply {
-                    horizontalTextPosition = SwingConstants.LEFT
-                    foreground = if (isSelected) UIUtil.getListSelectionForeground(true) else UIUtil.getInactiveTextColor()
-                }, BorderLayout.EAST)
                 return this
             }
         }
@@ -83,17 +76,13 @@ class RequestMappingModel(project: Project, contributors: List<ChooseByNameContr
     class MyLeftRenderer(private val myMatcher: Matcher?) : ColoredListCellRenderer<Any>() {
         override fun customizeCellRenderer(list: JList<*>, value: Any, index: Int, selected: Boolean, hasFocus: Boolean) {
             var bgColor = UIUtil.getListBackground()
-            if (value is PsiElement && !value.isValid) {
-                icon = IconUtil.getEmptyIcon(false)
-                append(LangBundle.message("label.invalid"), SimpleTextAttributes.ERROR_ATTRIBUTES)
-            } else if (value is PsiElementNavigationItem) {
-                val presentation = value.presentation ?: error("PSI elements displayed in choose by name lists must return a non-null value from getPresentation(): element $value, class ${value.javaClass.name}")
-                val name = presentation.presentableText ?: error("PSI elements displayed in choose by name lists must return a non-null value from getPresentation().getPresentableName: element $value, class ${value.javaClass.name}")
+            if (value is RequestMappingItem) {
+                val presentation = value.presentation as RequestMappingItem.RequestMappingItemPresentation
                 val textAttributes = NodeRenderer.getSimpleTextAttributes(presentation).toTextAttributes()
                 val psiElement = value.targetElement
-                if (psiElement != null && psiElement.isValid) {
-                    val project = psiElement.project
+                if (psiElement.isValid) {
                     PsiUtilCore.getVirtualFile(psiElement)?.let {
+                        val project = psiElement.project
                         VfsPresentationUtil.getFileBackgroundColor(project, it)?.apply { bgColor = this }
                         if (WolfTheProblemSolver.getInstance(project).isProblemFile(it)) {
                             textAttributes.effectType = EffectType.WAVE_UNDERSCORE
@@ -102,11 +91,13 @@ class RequestMappingModel(project: Project, contributors: List<ChooseByNameContr
                     }
                 }
                 val status = NavigationItemFileStatus.get(value)
-                textAttributes.foregroundColor = if (status !== FileStatus.NOT_CHANGED) status.color else list.foreground
-                if(presentation is RequestMappingItem.RequestMappingItemPresentation) {
-                    append("${presentation.getRequestMethod()}  ",getMethodSimpleTextAttributes(presentation.getRequestMethod(),textAttributes))
-                }
-                SpeedSearchUtil.appendColoredFragmentForMatcher(name, this, SimpleTextAttributes.fromTextAttributes(textAttributes), myMatcher, bgColor, selected)
+                if(status !== FileStatus.NOT_CHANGED) textAttributes.foregroundColor = status.color
+                val urlPathTextAttributes = SimpleTextAttributes.fromTextAttributes(textAttributes)
+                append("${presentation.getRequestMethod()}  ",getMethodSimpleTextAttributes(presentation.getRequestMethod(),textAttributes))
+                SpeedSearchUtil.appendColoredFragmentForMatcher(presentation.presentableText, this, urlPathTextAttributes, myMatcher, bgColor, selected)
+                val appendInfo = (if(presentation.getUrl().isNotBlank()) "url=${presentation.getUrl()}" else "" +
+                        if(presentation.getParams().isNotBlank()) " params=${presentation.getUrl()}" else "").trim()
+                if(appendInfo.isNotBlank()) append("  $appendInfo", urlPathTextAttributes)
                 icon = presentation.getIcon(false)
             } else {
                 icon = IconUtil.getEmptyIcon(false)
@@ -117,21 +108,30 @@ class RequestMappingModel(project: Project, contributors: List<ChooseByNameContr
         }
     }
 
-    private companion object{
-        private val DELETE = ColorUtil.fromHex("#F93E3E")
+    companion object{
         private val GET = ColorUtil.fromHex("#61AFFE")
-        private val PUT = ColorUtil.fromHex("#FCA130")
         private val POST = ColorUtil.fromHex("#49CC90")
+        private val PUT = ColorUtil.fromHex("#FCA130")
+        private val DELETE = ColorUtil.fromHex("#F93E3E")
+        private val ANY = ColorUtil.fromHex("#00FACE")
+
+        fun JComponent.addLocationLabel(value: RequestMappingItem, list: JList<*>, isSelected: Boolean) {
+            add(JLabel(value.presentation.locationString, value.targetElement.getIcon(Iconable.ICON_FLAG_READ_STATUS), SwingConstants.RIGHT).apply {
+                horizontalTextPosition = SwingConstants.LEFT
+                foreground = if (isSelected) list.foreground else UIUtil.getInactiveTextColor()
+            }, BorderLayout.EAST)
+        }
 
         private fun getMethodSimpleTextAttributes(method: String,textAttributes: TextAttributes) : SimpleTextAttributes {
             val attributes = TextAttributes()
             attributes.copyFrom(textAttributes)
             attributes.fontType = Font.BOLD
             attributes.foregroundColor = when(method){
-                MappingAnnotation.DELETE_METHOD -> DELETE
                 MappingAnnotation.GET_METHOD -> GET
-                MappingAnnotation.PUT_METHOD -> PUT
                 MappingAnnotation.POST_METHOD -> POST
+                MappingAnnotation.PUT_METHOD -> PUT
+                MappingAnnotation.DELETE_METHOD -> DELETE
+                MappingAnnotation.ANY_METHOD -> ANY
                 else -> attributes.foregroundColor
             }
             return SimpleTextAttributes.fromTextAttributes(attributes)

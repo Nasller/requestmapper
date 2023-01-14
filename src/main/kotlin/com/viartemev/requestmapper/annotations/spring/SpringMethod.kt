@@ -29,7 +29,7 @@ open class RequestMapping(psiAnnotation: PsiAnnotation) : SpringMappingAnnotatio
 		if (valueParam != null && valueParam.text.isNotBlank() && "{}" != valueParam.text) {
 			return valueParam.text.replace("RequestMethod.", "")
 		}
-		return MappingAnnotation.GET_METHOD
+		return MappingAnnotation.ANY_METHOD
 	}
 
 	private companion object {

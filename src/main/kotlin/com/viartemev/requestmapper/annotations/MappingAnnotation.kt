@@ -17,6 +17,7 @@ interface MappingAnnotation {
         const val DELETE_METHOD = "DELETE"
         const val HEAD_METHOD = "HEAD"
         const val OPTIONS_METHOD = "OPTIONS"
+        const val ANY_METHOD = "ANY"
 
         val supportedAnnotations = listOf(
             RequestMapping::class.java.simpleName,

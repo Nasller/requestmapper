@@ -27,8 +27,8 @@ object RequestMappingContributorSpek : Spek({
             it("should return item a particular name") {
                 val psiElement = mock<PsiElement> {}
                 val navigationItems = listOf(
-                    RequestMappingItem(psiElement, "/api/v1/users", "GET"),
-                    RequestMappingItem(psiElement, "/api/v2/users", "GET")
+                    RequestMappingItem(psiElement, "", "/api/v1/users", "GET"),
+                    RequestMappingItem(psiElement, "", "/api/v2/users", "GET")
                 )
                 val contributor = object : RequestMappingByNameContributor(navigationItems) {
                     override fun getAnnotationSearchers(annotationName: String, scope: GlobalSearchScope): Sequence<PsiAnnotation> =

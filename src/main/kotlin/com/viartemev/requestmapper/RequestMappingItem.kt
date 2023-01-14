@@ -7,11 +7,16 @@ import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiMethod
 
-class RequestMappingItem(private val psiElement: PsiElement, private val urlPath: String, private val requestMethod: String) : PsiElementNavigationItem {
-
+class RequestMappingItem(
+    private val psiElement: PsiElement,
+    private val url: String,
+    private val urlPath: String,
+    private val requestMethod: String,
+    private val params: String = "",
+) : PsiElementNavigationItem {
     private val navigationElement = psiElement.navigationElement as? Navigatable
 
-    override fun getName(): String = this.requestMethod + " " + this.urlPath
+    override fun getName(): String = urlPath
 
     override fun getPresentation(): ItemPresentation = RequestMappingItemPresentation(this)
 
@@ -24,11 +29,15 @@ class RequestMappingItem(private val psiElement: PsiElement, private val urlPath
     override fun canNavigateToSource(): Boolean = true
 
     override fun toString(): String {
-        return "RequestMappingItem(psiElement=$psiElement, urlPath='$urlPath', requestMethod='$requestMethod', navigationElement=$navigationElement)"
+        return "RequestMappingItem(psiElement=$psiElement, requestMethod='$requestMethod', url='$url', urlPath='$urlPath', params='$params', navigationElement=$navigationElement)"
     }
 
     internal class RequestMappingItemPresentation(private val item: RequestMappingItem) : ItemPresentation {
         fun getRequestMethod() = item.requestMethod
+
+        fun getUrl() = item.url
+
+        fun getParams() = item.params
 
         override fun getPresentableText() = item.urlPath
 

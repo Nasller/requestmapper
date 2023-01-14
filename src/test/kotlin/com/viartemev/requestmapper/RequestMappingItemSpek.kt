@@ -20,7 +20,7 @@ object RequestMappingItemSpek : Spek({
                 on { containingFile } doReturn psiFile
                 on { name } doReturn "Controller"
             }
-            val item = RequestMappingItem(psiElement, "/api/v1/users", "POST")
+            val item = RequestMappingItem(psiElement, "", "/api/v1/users", "POST")
             val presentation = item.presentation
             it("should return presentation with presentableText equal to the method with the path") {
                 presentation.presentableText shouldBeEqualTo "POST /api/v1/users"
@@ -40,7 +40,7 @@ object RequestMappingItemSpek : Spek({
                 on { containingFile } doReturn psiFile
                 on { name } doReturn "method"
             }
-            val item = RequestMappingItem(psiElement, "/api/v1/users", "POST")
+            val item = RequestMappingItem(psiElement, "", "/api/v1/users", "POST")
             val presentation = item.presentation
             it("should return presentation with presentableText equal to the method with the path") {
                 presentation.presentableText shouldBeEqualTo "POST /api/v1/users"
@@ -56,7 +56,7 @@ object RequestMappingItemSpek : Spek({
             val psiElement = mock<PsiFile> {
                 on { name } doReturn "Controller"
             }
-            val item = RequestMappingItem(psiElement, "/api/v1/users", "POST")
+            val item = RequestMappingItem(psiElement, "", "/api/v1/users", "POST")
             val presentation = item.presentation
             it("should return presentation with presentableText equal to the method with the path") {
                 presentation.presentableText shouldBeEqualTo "POST /api/v1/users"

@@ -28,7 +28,7 @@ abstract class MicronautMappingAnnotation(
     private fun fetchRequestMappingItem(annotation: PsiAnnotation, psiMethod: PsiMethod, method: String): List<RequestMappingItem> {
         val classMapping = fetchMappingFromClass(psiMethod)
         val methodMapping = fetchMappingFromMethod(annotation, psiMethod)
-        return listOf(RequestMappingItem(psiMethod, urlFormatter.format(classMapping, methodMapping), method))
+        return listOf(RequestMappingItem(psiMethod, "", urlFormatter.format(classMapping, methodMapping), method))
     }
 
     private fun fetchMappingFromClass(psiMethod: PsiMethod): String {
