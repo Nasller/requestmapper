@@ -7,14 +7,14 @@ import com.viartemev.requestmapper.annotations.spring.SpringMappingAnnotation
 class ClassFeignClientMapping(val annotation: PsiAnnotation) : SpringClassMappingAnnotation {
     override fun fetchClassMapping(): List<ClassMappingData> {
         val pathAnnotation = PathAnnotation(annotation)
-        val name = pathAnnotation.fetchMappings(SpringMappingAnnotation.VALUE).firstOrNull() ?:
-        pathAnnotation.fetchMappings(SpringMappingAnnotation.NAME).firstOrNull() ?: ""
         var url = pathAnnotation.fetchMappings(SpringMappingAnnotation.URL).firstOrNull() ?: ""
         val path = pathAnnotation.fetchMappings(SpringMappingAnnotation.PATH).firstOrNull() ?: ""
-
         // analogue from org.springframework.cloud.openfeign.FeignClientFactoryBean#getTarget
         if (url.isBlank()) {
-            url = name
+            val value = pathAnnotation.fetchMappings(SpringMappingAnnotation.VALUE).firstOrNull()
+            url = if(value.isNullOrBlank()) {
+                pathAnnotation.fetchMappings(SpringMappingAnnotation.NAME).firstOrNull() ?: ""
+            } else value
         }
         return listOf(ClassMappingData(url,getCleanPath(path)))
     }
