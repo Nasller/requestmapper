@@ -1,10 +1,6 @@
 package com.viartemev.requestmapper.annotations.spring
 
-import com.intellij.psi.PsiAnnotation
-import com.intellij.psi.PsiAnnotationMemberValue
-import com.intellij.psi.PsiLiteralExpression
-import com.intellij.psi.PsiMethod
-import com.intellij.psi.PsiReferenceExpression
+import com.intellij.psi.*
 import com.viartemev.requestmapper.RequestMappingItem
 import com.viartemev.requestmapper.annotations.MappingAnnotation
 import com.viartemev.requestmapper.annotations.PathAnnotation
@@ -37,10 +33,8 @@ abstract class SpringMappingAnnotation(
         }.flatten()
     }
 
-    private fun fetchMappingsParams(annotation: PsiAnnotation): List<String> {
-        val fetchMappingsFromAnnotation = PathAnnotation(annotation).fetchMappings(PARAMS)
-        return if (fetchMappingsFromAnnotation.isNotEmpty()) fetchMappingsFromAnnotation else listOf("")
-    }
+    private fun fetchMappingsParams(annotation: PsiAnnotation): List<String> =
+        PathAnnotation(annotation).fetchMappings(PARAMS).ifEmpty { listOf("") }
 
     private fun fetchMappingsFromClass(psiMethod: PsiMethod): List<String> {
         val classMapping = psiMethod
@@ -50,16 +44,14 @@ abstract class SpringMappingAnnotation(
             ?.filterNotNull()
             ?.filter { it.qualifiedName == SPRING_REQUEST_MAPPING_CLASS }
             ?.flatMap { fetchMapping(it) } ?: emptyList()
-        return if (classMapping.isEmpty()) listOf("") else classMapping
+        return classMapping.ifEmpty { listOf("") }
     }
 
-    private fun fetchMapping(annotation: PsiAnnotation): List<String> {
-        val pathMapping = PathAnnotation(annotation).fetchMappings(PATH)
-        return if (pathMapping.isNotEmpty()) pathMapping else {
+    private fun fetchMapping(annotation: PsiAnnotation): List<String> =
+        PathAnnotation(annotation).fetchMappings(PATH).ifEmpty {
             val valueMapping = PathAnnotation(annotation).fetchMappings(VALUE)
-            if (valueMapping.isNotEmpty()) valueMapping else listOf("")
+            valueMapping.ifEmpty { listOf("") }
         }
-    }
 
     private fun fetchMappingsFromMethod(annotation: PsiAnnotation, method: PsiMethod): List<String> {
         val parametersNameWithType = method
@@ -83,12 +75,10 @@ abstract class SpringMappingAnnotation(
     private fun extractPsiAnnotation(psiAnnotationMemberValue: PsiAnnotationMemberValue?, defaultValue: String): String {
         return when (psiAnnotationMemberValue) {
             is PsiLiteralExpression -> {
-                val expression = PsiExpressionExtractor.extractExpression(psiAnnotationMemberValue)
-                if (expression.isNotBlank()) expression else defaultValue
+                PsiExpressionExtractor.extractExpression(psiAnnotationMemberValue).ifBlank { defaultValue }
             }
             is PsiReferenceExpression -> {
-                val expression = PsiExpressionExtractor.extractExpression(psiAnnotationMemberValue)
-                if (expression.isNotBlank()) expression else defaultValue
+                PsiExpressionExtractor.extractExpression(psiAnnotationMemberValue).ifBlank { defaultValue }
             }
             else -> defaultValue
         }

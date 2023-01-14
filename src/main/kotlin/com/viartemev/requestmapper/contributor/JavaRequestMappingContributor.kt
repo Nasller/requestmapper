@@ -1,16 +1,15 @@
 package com.viartemev.requestmapper.contributor
 
-import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiAnnotation
 import com.intellij.psi.impl.java.stubs.index.JavaAnnotationIndex
-import com.intellij.util.indexing.FindSymbolParameters
+import com.intellij.psi.search.GlobalSearchScope
 
 class JavaRequestMappingContributor : RequestMappingByNameContributor() {
-
-    override fun getAnnotationSearchers(annotationName: String, project: Project, includeNonProjectItems: Boolean): Sequence<PsiAnnotation> {
+    override fun getAnnotationSearchers(annotationName: String, scope: GlobalSearchScope): Sequence<PsiAnnotation> {
+        val project = scope.project ?: return emptySequence()
         return JavaAnnotationIndex
             .getInstance()
-            .get(annotationName, project, FindSymbolParameters.searchScopeFor(project,includeNonProjectItems))
+            .get(annotationName, project, scope)
             .asSequence()
     }
 }

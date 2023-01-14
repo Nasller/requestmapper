@@ -15,13 +15,12 @@
         <li>Spring</li>
         <li>JAX-RS</li>
         <li>Micronaut</li>
-        <li>Helidon</li>
       </ul>
     ]]></description>
 
     <change-notes><![CDATA[
         <ul>
-            <li>Add Non project items</li>
+            <li>Optimize</li>
         </ul>
     ]]>
     </change-notes>
@@ -41,7 +40,7 @@
     </actions>
 
     <extensionPoints>
-        <extensionPoint name="requestMappingContributor" interface="com.intellij.navigation.ChooseByNameContributor"/>
+        <extensionPoint name="requestMappingContributor" interface="com.intellij.navigation.ChooseByNameContributorEx"/>
     </extensionPoints>
 
     <extensions defaultExtensionNs="com.intellij">

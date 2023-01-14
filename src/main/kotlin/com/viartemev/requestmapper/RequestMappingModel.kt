@@ -8,7 +8,7 @@ import com.intellij.ide.util.gotoByName.FilteringGotoByModel
 import com.intellij.ide.util.gotoByName.LanguageRef
 import com.intellij.ide.util.treeView.NodeRenderer
 import com.intellij.lang.LangBundle
-import com.intellij.navigation.ChooseByNameContributor
+import com.intellij.navigation.ChooseByNameContributorEx
 import com.intellij.navigation.NavigationItem
 import com.intellij.navigation.NavigationItemFileStatus
 import com.intellij.navigation.PsiElementNavigationItem
@@ -37,7 +37,7 @@ import javax.swing.JList
 import javax.swing.ListCellRenderer
 import javax.swing.SwingConstants
 
-class RequestMappingModel(project: Project, contributors: List<ChooseByNameContributor>) : FilteringGotoByModel<LanguageRef>(project, contributors), DumbAware {
+class RequestMappingModel(project: Project, contributors: List<ChooseByNameContributorEx>) : FilteringGotoByModel<LanguageRef>(project, contributors), DumbAware {
 
     override fun getItemProvider(context: PsiElement?): ChooseByNameItemProvider = RequestMappingItemProvider()
 
