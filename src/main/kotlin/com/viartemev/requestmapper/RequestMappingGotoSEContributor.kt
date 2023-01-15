@@ -1,7 +1,10 @@
 package com.viartemev.requestmapper
 
 import com.intellij.ide.actions.SearchEverywherePsiRenderer
-import com.intellij.ide.actions.searcheverywhere.*
+import com.intellij.ide.actions.searcheverywhere.AbstractGotoSEContributor
+import com.intellij.ide.actions.searcheverywhere.PersistentSearchEverywhereContributorFilter
+import com.intellij.ide.actions.searcheverywhere.SearchEverywhereContributor
+import com.intellij.ide.actions.searcheverywhere.SearchEverywhereContributorFactory
 import com.intellij.ide.util.gotoByName.FilteringGotoByModel
 import com.intellij.ide.util.gotoByName.GotoClassSymbolConfiguration
 import com.intellij.ide.util.gotoByName.LanguageRef
@@ -46,7 +49,7 @@ class RequestMappingGotoSEContributor(event: AnActionEvent) : AbstractGotoSECont
     }
 
     override fun getActions(onChanged: Runnable): List<AnAction> {
-        return doGetActions(myFilter, SearchEverywhereFiltersStatisticsCollector.LangFilterCollector(), onChanged)
+        return doGetActions(myFilter, null, onChanged)
     }
 
     override fun getElementsRenderer(): ListCellRenderer<Any> {

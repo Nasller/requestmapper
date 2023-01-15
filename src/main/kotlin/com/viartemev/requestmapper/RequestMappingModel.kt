@@ -3,7 +3,6 @@ package com.viartemev.requestmapper
 import com.intellij.ide.IdeBundle
 import com.intellij.ide.util.NavigationItemListCellRenderer
 import com.intellij.ide.util.PropertiesComponent
-import com.intellij.ide.util.gotoByName.ChooseByNameItemProvider
 import com.intellij.ide.util.gotoByName.FilteringGotoByModel
 import com.intellij.ide.util.gotoByName.LanguageRef
 import com.intellij.ide.util.treeView.NodeRenderer
@@ -18,7 +17,6 @@ import com.intellij.openapi.util.Iconable
 import com.intellij.openapi.vcs.FileStatus
 import com.intellij.openapi.vfs.newvfs.VfsPresentationUtil
 import com.intellij.problems.WolfTheProblemSolver
-import com.intellij.psi.PsiElement
 import com.intellij.psi.util.PsiUtilCore
 import com.intellij.ui.*
 import com.intellij.ui.speedSearch.SpeedSearchUtil
@@ -33,8 +31,6 @@ import java.awt.Font
 import javax.swing.*
 
 class RequestMappingModel(project: Project, contributors: List<ChooseByNameContributorEx>) : FilteringGotoByModel<LanguageRef>(project, contributors), DumbAware {
-
-    override fun getItemProvider(context: PsiElement?): ChooseByNameItemProvider = RequestMappingItemProvider(context)
 
     override fun filterValueFor(item: NavigationItem): LanguageRef? = (item as? RequestMappingItem)?.let { item.targetElement.language.let { LanguageRef.forLanguage(it) } }
 
