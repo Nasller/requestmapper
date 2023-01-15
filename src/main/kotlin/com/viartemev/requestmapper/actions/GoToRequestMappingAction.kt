@@ -1,25 +1,43 @@
 package com.viartemev.requestmapper.actions
 
 import com.intellij.ide.actions.GotoActionBase
+import com.intellij.ide.ui.laf.darcula.ui.DarculaEditorTextFieldBorder
 import com.intellij.ide.util.gotoByName.ChooseByNameFilter
+import com.intellij.ide.util.gotoByName.ChooseByNameModelEx
 import com.intellij.ide.util.gotoByName.ChooseByNamePopup
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys.PROJECT
 import com.intellij.openapi.actionSystem.CustomShortcutSet
+import com.intellij.openapi.fileEditor.ex.FileEditorManagerEx
 import com.intellij.openapi.project.DumbAware
+import com.intellij.util.ui.JBInsets
 import com.viartemev.requestmapper.RequestMappingItem
 import com.viartemev.requestmapper.RequestMappingModel
 import com.viartemev.requestmapper.contributors.RequestMappingContributor
+import java.awt.Component
+import java.awt.Insets
 
 class GoToRequestMappingAction : GotoActionBase(), DumbAware {
     override fun gotoActionPerformed(e: AnActionEvent) {
         val project = e.getData(PROJECT) ?: return
         val contributors = RequestMappingContributor.getExtensions()
-        val requestMappingModel = RequestMappingModel(project, contributors)
-        requestMappingModel.setFilterItems(contributors.map(RequestMappingContributor::getLanguageRef))
-        showNavigationPopup(e, requestMappingModel, object : GotoActionCallback<String>() {
+        val model = RequestMappingModel(project, contributors)
+        model.setFilterItems(contributors.map(RequestMappingContributor::getLanguageRef))
+        val start = getInitialText(true, e)
+        val popup = CustomChooseByNamePopup.createPopup(project, model,
+            ChooseByNameModelEx.getItemProvider(model, getPsiContext(e)), start.first,
+            model.willOpenEditor() && FileEditorManagerEx.getInstanceEx(project).hasSplitOrUndockedWindows(), start.second)
+        showNavigationPopup(object : GotoActionCallback<String>() {
             override fun createFilter(popup: ChooseByNamePopup): ChooseByNameFilter<String>? {
                 popup.setCheckBoxShortcut(CustomShortcutSet.EMPTY)
+                popup.textField.apply {
+                    columns = 100
+                    border = object : DarculaEditorTextFieldBorder() {
+                        override fun getBorderInsets(c: Component): Insets {
+                            return JBInsets.create(6, 4).asUIResource()
+                        }
+                    }
+                }
                 return super.createFilter(popup)
             }
 
@@ -28,6 +46,6 @@ class GoToRequestMappingAction : GotoActionBase(), DumbAware {
                     element.navigate(true)
                 }
             }
-        }, false)
+        }, null, popup, false)
     }
 }

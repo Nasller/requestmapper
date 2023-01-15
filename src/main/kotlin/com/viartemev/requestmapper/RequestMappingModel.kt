@@ -23,6 +23,7 @@ import com.intellij.ui.speedSearch.SpeedSearchUtil
 import com.intellij.util.IconUtil
 import com.intellij.util.text.Matcher
 import com.intellij.util.text.MatcherHolder
+import com.intellij.util.ui.JBUI.Borders
 import com.intellij.util.ui.UIUtil
 import com.viartemev.requestmapper.annotations.MappingAnnotation
 import java.awt.BorderLayout
@@ -32,7 +33,7 @@ import javax.swing.*
 
 class RequestMappingModel(project: Project, contributors: List<ChooseByNameContributorEx>) : FilteringGotoByModel<LanguageRef>(project, contributors), DumbAware {
 
-    override fun filterValueFor(item: NavigationItem): LanguageRef? = (item as? RequestMappingItem)?.let { item.targetElement.language.let { LanguageRef.forLanguage(it) } }
+    override fun filterValueFor(item: NavigationItem): LanguageRef? = (item as? RequestMappingItem)?.run { targetElement.language.let { LanguageRef.forLanguage(it) } }
 
     override fun getPromptText(): String = "Enter mapping url"
 
@@ -64,6 +65,7 @@ class RequestMappingModel(project: Project, contributors: List<ChooseByNameContr
                 add(component, BorderLayout.WEST)
                 addLocationLabel(value, list, isSelected)
                 background = component.background
+                border = customBorder
                 return this
             }
         }
@@ -110,6 +112,7 @@ class RequestMappingModel(project: Project, contributors: List<ChooseByNameContr
         private val PUT = ColorUtil.fromHex("#FCA130")
         private val DELETE = ColorUtil.fromHex("#F93E3E")
         private val ANY = ColorUtil.fromHex("#00FACE")
+        private val customBorder = Borders.empty(2,0)
 
         fun JComponent.addLocationLabel(value: RequestMappingItem, list: JList<*>, isSelected: Boolean) {
             add(JLabel(value.presentation.locationString, value.targetElement.getIcon(Iconable.ICON_FLAG_READ_STATUS), SwingConstants.RIGHT).apply {
