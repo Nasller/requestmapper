@@ -23,13 +23,13 @@ abstract class SpringMappingAnnotation(
         val classMappings = SpringClassMappingAnnotation.fetchMappingsFromClass(psiMethod)
         val methodMappings = fetchMappingsFromMethod(annotation, psiMethod)
         val paramsMappings = PathAnnotation(annotation).fetchMappings(PARAMS).ifEmpty { listOf("") }
-        return classMappings.map { clazz ->
-            methodMappings.map { method ->
+        return classMappings.flatMap { clazz ->
+            methodMappings.flatMap { method ->
                 paramsMappings.map { param ->
                     RequestMappingItem(psiMethod, clazz.url, urlFormatter.format(clazz.path, method), methodName, param)
                 }
-            }.flatten()
-        }.flatten()
+            }
+        }
     }
 
     private fun fetchMappingsFromMethod(annotation: PsiAnnotation, method: PsiMethod): List<String> {

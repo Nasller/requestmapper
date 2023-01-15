@@ -28,7 +28,7 @@ abstract class RequestMappingByNameContributor(private var navigationItems: List
                     startsWith(MICRONAUT_PACKAGE_NAME,true) || startsWith(SPRING_PACKAGE_NAME,true) || startsWith(JAXRS_PACKAGE_NAME,true)
                 } == true
             }
-            .flatMap { mappingAnnotation(annotationName, it).values().asSequence() }
+            .flatMap { mappingAnnotation(annotationName, it).values() }
             .toList()
     }
 

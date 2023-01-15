@@ -1,6 +1,9 @@
 package com.viartemev.requestmapper.annotations.spring
 
 import com.intellij.psi.PsiAnnotation
+import com.intellij.psi.PsiIdentifier
+import com.intellij.psi.PsiJavaToken
+import com.intellij.psi.PsiQualifiedReference
 import com.viartemev.requestmapper.annotations.MappingAnnotation
 
 class DeleteMapping(psiAnnotation: PsiAnnotation) : RequestMapping(psiAnnotation) {
@@ -25,9 +28,12 @@ class PutMapping(psiAnnotation: PsiAnnotation) : RequestMapping(psiAnnotation) {
 
 open class RequestMapping(psiAnnotation: PsiAnnotation) : SpringMappingAnnotation(psiAnnotation) {
 	override fun extractMethod(): String {
-		val valueParam = psiAnnotation.findAttributeValue(METHOD_PARAM)
-		if (valueParam != null && valueParam.text.isNotBlank() && "{}" != valueParam.text) {
-			return valueParam.text.replace("RequestMethod.", "")
+		val children = psiAnnotation.findAttributeValue(METHOD_PARAM)?.children
+		if (!children.isNullOrEmpty()) {
+            return if(children[0] is PsiJavaToken) children.filterIsInstance<PsiQualifiedReference>().map { it.referenceName }
+                .filter { it.isNullOrBlank().not() && it != "RequestMethod" }
+                .joinToString(" ").ifBlank { MappingAnnotation.ANY_METHOD }
+			else children.filterIsInstance<PsiIdentifier>().joinToString(" ") { it.text }
 		}
 		return MappingAnnotation.ANY_METHOD
 	}

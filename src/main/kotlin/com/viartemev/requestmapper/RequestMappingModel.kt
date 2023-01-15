@@ -91,8 +91,10 @@ class RequestMappingModel(project: Project, contributors: List<ChooseByNameContr
                 val status = NavigationItemFileStatus.get(value)
                 if(status !== FileStatus.NOT_CHANGED) textAttributes.foregroundColor = status.color
                 val urlPathTextAttributes = SimpleTextAttributes.fromTextAttributes(textAttributes)
-                append("${presentation.getRequestMethod()}  ",getMethodSimpleTextAttributes(presentation.getRequestMethod(),textAttributes))
-                SpeedSearchUtil.appendColoredFragmentForMatcher(presentation.presentableText, this, urlPathTextAttributes, myMatcher, bgColor, selected)
+                presentation.getRequestMethod().splitToSequence(" ").forEach {
+                    append("$it ",getMethodSimpleTextAttributes(it,textAttributes))
+                }
+                SpeedSearchUtil.appendColoredFragmentForMatcher(" ${presentation.presentableText}", this, urlPathTextAttributes, myMatcher, bgColor, selected)
                 val appendInfo = (if(presentation.getUrl().isNotBlank()) "url=${presentation.getUrl()}" else "" +
                         if(presentation.getParams().isNotBlank()) " params=${presentation.getUrl()}" else "").trim()
                 if(appendInfo.isNotBlank()) append("  $appendInfo", urlPathTextAttributes)
@@ -111,7 +113,10 @@ class RequestMappingModel(project: Project, contributors: List<ChooseByNameContr
         private val POST = ColorUtil.fromHex("#49CC90")
         private val PUT = ColorUtil.fromHex("#FCA130")
         private val DELETE = ColorUtil.fromHex("#F93E3E")
-        private val ANY = ColorUtil.fromHex("#00FACE")
+        private val HEAD = ColorUtil.fromHex("#9012FE")
+        private val PATCH = ColorUtil.fromHex("#50E3C2")
+        private val OPTIONS = ColorUtil.fromHex("#0D5AA7")
+        private val ANY = ColorUtil.fromHex("#E3FA00")
         private val customBorder = Borders.empty(2,0)
 
         fun JComponent.addLocationLabel(value: RequestMappingItem, list: JList<*>, isSelected: Boolean) {
@@ -130,6 +135,9 @@ class RequestMappingModel(project: Project, contributors: List<ChooseByNameContr
                 MappingAnnotation.POST_METHOD -> POST
                 MappingAnnotation.PUT_METHOD -> PUT
                 MappingAnnotation.DELETE_METHOD -> DELETE
+                MappingAnnotation.HEAD_METHOD -> HEAD
+                MappingAnnotation.PATCH_METHOD -> PATCH
+                MappingAnnotation.OPTIONS_METHOD -> OPTIONS
                 MappingAnnotation.ANY_METHOD -> ANY
                 else -> attributes.foregroundColor
             }
