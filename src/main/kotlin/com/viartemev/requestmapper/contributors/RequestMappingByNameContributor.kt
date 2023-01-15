@@ -23,10 +23,18 @@ abstract class RequestMappingByNameContributor(private var navigationItems: List
     }
 
     private fun findRequestMappingItems(annotationName: String, scope: GlobalSearchScope): List<RequestMappingItem> {
-        return getAnnotationSearchers(annotationName, scope)
-            .filter { it.isMethodAnnotation() }
-            .map { annotation -> mappingAnnotation(annotationName, annotation) }
-            .flatMap { mappingAnnotation -> mappingAnnotation.values().asSequence() }
+        return getAnnotationSearchers(annotationName, scope).filter {
+                it.isMethodAnnotation() && it.qualifiedName?.run {
+                    startsWith(MICRONAUT_PACKAGE_NAME,true) || startsWith(SPRING_PACKAGE_NAME,true) || startsWith(JAXRS_PACKAGE_NAME,true)
+                } == true
+            }
+            .flatMap { mappingAnnotation(annotationName, it).values().asSequence() }
             .toList()
+    }
+
+    private companion object{
+        const val JAXRS_PACKAGE_NAME = "javax.ws.rs"
+        const val MICRONAUT_PACKAGE_NAME = "io.micronaut.http.annotation"
+        const val SPRING_PACKAGE_NAME = "org.springframework.web.bind.annotation"
     }
 }
