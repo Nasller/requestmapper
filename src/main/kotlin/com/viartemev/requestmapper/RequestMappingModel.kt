@@ -3,6 +3,7 @@ package com.viartemev.requestmapper
 import com.intellij.ide.IdeBundle
 import com.intellij.ide.util.NavigationItemListCellRenderer
 import com.intellij.ide.util.PropertiesComponent
+import com.intellij.ide.util.PsiElementListCellRenderer
 import com.intellij.ide.util.gotoByName.FilteringGotoByModel
 import com.intellij.ide.util.gotoByName.LanguageRef
 import com.intellij.ide.util.treeView.NodeRenderer
@@ -13,7 +14,6 @@ import com.intellij.openapi.editor.markup.EffectType
 import com.intellij.openapi.editor.markup.TextAttributes
 import com.intellij.openapi.project.DumbAware
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.util.Iconable
 import com.intellij.openapi.vcs.FileStatus
 import com.intellij.openapi.vfs.newvfs.VfsPresentationUtil
 import com.intellij.problems.WolfTheProblemSolver
@@ -21,6 +21,7 @@ import com.intellij.psi.util.PsiUtilCore
 import com.intellij.ui.*
 import com.intellij.ui.speedSearch.SpeedSearchUtil
 import com.intellij.util.IconUtil
+import com.intellij.util.SlowOperations
 import com.intellij.util.text.Matcher
 import com.intellij.util.text.MatcherHolder
 import com.intellij.util.ui.JBUI.Borders
@@ -63,9 +64,9 @@ class RequestMappingModel(project: Project, contributors: List<ChooseByNameContr
                 val component = MyLeftRenderer(MatcherHolder.getAssociatedMatcher(list))
                     .getListCellRendererComponent(list, value, index, isSelected, cellHasFocus)
                 add(component, BorderLayout.WEST)
-                addLocationLabel(value, list, isSelected)
                 background = component.background
                 border = customBorder
+                addRightModuleComponent(value, list, isSelected)
                 return this
             }
         }
@@ -94,10 +95,11 @@ class RequestMappingModel(project: Project, contributors: List<ChooseByNameContr
                 presentation.getRequestMethod().splitToSequence(" ").forEach {
                     append("$it ",getMethodSimpleTextAttributes(it,textAttributes))
                 }
-                SpeedSearchUtil.appendColoredFragmentForMatcher(" ${presentation.presentableText}", this, urlPathTextAttributes, myMatcher, bgColor, selected)
+                SpeedSearchUtil.appendColoredFragmentForMatcher(" ${presentation.presentableText} ", this, urlPathTextAttributes, myMatcher, bgColor, selected)
                 val appendInfo = (if(presentation.getUrl().isNotBlank()) "url=${presentation.getUrl()}" else "" +
                         if(presentation.getParams().isNotBlank()) " params=${presentation.getUrl()}" else "").trim()
-                if(appendInfo.isNotBlank()) append("  $appendInfo", urlPathTextAttributes)
+                if(appendInfo.isNotBlank()) append("$appendInfo ", urlPathTextAttributes)
+                append(presentation.locationString, SimpleTextAttributes.GRAYED_ATTRIBUTES)
                 icon = presentation.getIcon(false)
             } else {
                 icon = IconUtil.getEmptyIcon(false)
@@ -119,11 +121,15 @@ class RequestMappingModel(project: Project, contributors: List<ChooseByNameContr
         private val ANY = ColorUtil.fromHex("#E3FA00")
         private val customBorder = Borders.empty(2,0)
 
-        fun JComponent.addLocationLabel(value: RequestMappingItem, list: JList<*>, isSelected: Boolean) {
-            add(JLabel(value.presentation.locationString, value.targetElement.getIcon(Iconable.ICON_FLAG_READ_STATUS), SwingConstants.RIGHT).apply {
-                horizontalTextPosition = SwingConstants.LEFT
-                foreground = if (isSelected) list.foreground else UIUtil.getInactiveTextColor()
-            }, BorderLayout.EAST)
+        fun JComponent.addRightModuleComponent(value: RequestMappingItem,list: JList<*>, isSelected: Boolean) {
+            SlowOperations.allowSlowOperations(SlowOperations.RENDERING).use {
+                PsiElementListCellRenderer.getModuleTextWithIcon(value.targetElement)
+            }?.let{
+                add(JLabel(it.text, it.icon, SwingConstants.RIGHT).apply {
+                    horizontalTextPosition = SwingConstants.LEFT
+                    foreground = if (isSelected) list.foreground else UIUtil.getInactiveTextColor()
+                }, BorderLayout.EAST)
+            }
         }
 
         private fun getMethodSimpleTextAttributes(method: String,textAttributes: TextAttributes) : SimpleTextAttributes {

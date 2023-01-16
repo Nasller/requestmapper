@@ -12,7 +12,7 @@ import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.project.Project
 import com.intellij.util.text.MatcherHolder
-import com.viartemev.requestmapper.RequestMappingModel.Companion.addLocationLabel
+import com.viartemev.requestmapper.RequestMappingModel.Companion.addRightModuleComponent
 import com.viartemev.requestmapper.contributors.RequestMappingContributor
 import java.awt.BorderLayout
 import java.awt.Component
@@ -60,8 +60,8 @@ class RequestMappingGotoSEContributor(event: AnActionEvent) : AbstractGotoSECont
                 val component = RequestMappingModel.MyLeftRenderer(MatcherHolder.getAssociatedMatcher(list))
                     .getListCellRendererComponent(list, value, index, isSelected, cellHasFocus)
                 add(component, BorderLayout.WEST)
-                addLocationLabel(value, list, isSelected)
                 background = component.background
+                addRightModuleComponent(value, list, isSelected)
                 return this
             }
         }
