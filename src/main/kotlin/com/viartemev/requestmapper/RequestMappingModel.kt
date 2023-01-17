@@ -15,9 +15,10 @@ import com.intellij.openapi.editor.markup.TextAttributes
 import com.intellij.openapi.project.DumbAware
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vcs.FileStatus
+import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.vfs.newvfs.VfsPresentationUtil
 import com.intellij.problems.WolfTheProblemSolver
-import com.intellij.psi.util.PsiUtilCore
+import com.intellij.psi.PsiFile
 import com.intellij.ui.*
 import com.intellij.ui.speedSearch.SpeedSearchUtil
 import com.intellij.util.IconUtil
@@ -78,10 +79,10 @@ class RequestMappingModel(project: Project, contributors: List<ChooseByNameContr
             if (value is RequestMappingItem) {
                 val presentation = value.presentation as RequestMappingItem.RequestMappingItemPresentation
                 val textAttributes = NodeRenderer.getSimpleTextAttributes(presentation).toTextAttributes()
-                val psiElement = value.targetElement
-                if (psiElement.isValid) {
-                    PsiUtilCore.getVirtualFile(psiElement)?.let {
-                        val project = psiElement.project
+                val containingFile = presentation.containingFile
+                if (containingFile?.isValid == true) {
+                    getVirtualFile(containingFile)?.let {
+                        val project = value.targetElement.project
                         VfsPresentationUtil.getFileBackgroundColor(project, it)?.apply { bgColor = this }
                         if (WolfTheProblemSolver.getInstance(project).isProblemFile(it)) {
                             textAttributes.effectType = EffectType.WAVE_UNDERSCORE
@@ -130,6 +131,17 @@ class RequestMappingModel(project: Project, contributors: List<ChooseByNameContr
                     foreground = if (isSelected) list.foreground else UIUtil.getInactiveTextColor()
                 }, BorderLayout.EAST)
             }
+        }
+
+        private fun getVirtualFile(containingFile: PsiFile): VirtualFile? {
+            var virtualFile = containingFile.virtualFile
+            if (virtualFile == null) {
+                val originalFile = containingFile.originalFile
+                if (originalFile !== containingFile && originalFile.isValid) {
+                    virtualFile = originalFile.virtualFile
+                }
+            }
+            return virtualFile
         }
 
         private fun getMethodSimpleTextAttributes(method: String,textAttributes: TextAttributes) : SimpleTextAttributes {

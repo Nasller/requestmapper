@@ -2,10 +2,13 @@ package com.viartemev.requestmapper
 
 import com.intellij.navigation.ItemPresentation
 import com.intellij.navigation.PsiElementNavigationItem
+import com.intellij.openapi.util.Iconable
 import com.intellij.pom.Navigatable
 import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiElement
+import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiMethod
+import javax.swing.Icon
 
 class RequestMappingItem(
     private val psiElement: PsiElement,
@@ -16,23 +19,24 @@ class RequestMappingItem(
 ) : PsiElementNavigationItem {
     private val navigationElement = psiElement.navigationElement as? Navigatable
 
-    override fun getName(): String = urlPath
+    override fun getName() = urlPath
 
     override fun getPresentation(): ItemPresentation = RequestMappingItemPresentation(this)
 
-    override fun getTargetElement(): PsiElement = psiElement
+    override fun getTargetElement() = psiElement
 
     override fun navigate(requestFocus: Boolean) = navigationElement?.navigate(requestFocus) ?: Unit
 
-    override fun canNavigate(): Boolean = navigationElement?.canNavigate() ?: false
+    override fun canNavigate() = navigationElement?.canNavigate() ?: false
 
-    override fun canNavigateToSource(): Boolean = true
+    override fun canNavigateToSource() = true
 
-    override fun toString(): String {
-        return "RequestMappingItem(psiElement=$psiElement, requestMethod='$requestMethod', url='$url', urlPath='$urlPath', params='$params', navigationElement=$navigationElement)"
-    }
+    override fun toString() =
+        "RequestMappingItem(psiElement=$psiElement, requestMethod='$requestMethod', url='$url', urlPath='$urlPath', params='$params', navigationElement=$navigationElement)"
 
     internal class RequestMappingItemPresentation(private val item: RequestMappingItem) : ItemPresentation {
+        val containingFile: PsiFile? = item.targetElement.containingFile
+
         fun getRequestMethod() = item.requestMethod
 
         fun getUrl() = item.url
@@ -42,13 +46,13 @@ class RequestMappingItem(
         override fun getPresentableText() = item.urlPath
 
         override fun getLocationString(): String {
-            return when (val psiElement = item.psiElement) {
-                is PsiMethod -> (psiElement.containingClass?.name ?: psiElement.containingFile?.name ?: "unknownFile") + "." + psiElement.name
-                is PsiClass -> psiElement.name ?: psiElement.containingFile?.name ?: "unknownFile"
+            return when (val psiElement = item.targetElement) {
+                is PsiMethod -> (psiElement.containingClass?.name ?: containingFile?.name ?: "unknownFile") + "." + psiElement.name
+                is PsiClass -> psiElement.name ?: containingFile?.name ?: "unknownFile"
                 else -> "unknownLocation"
             }
         }
 
-        override fun getIcon(b: Boolean) = RequestMapperIcons.SEARCH
+        override fun getIcon(b: Boolean): Icon? = containingFile?.getIcon(Iconable.ICON_FLAG_READ_STATUS)
     }
 }
