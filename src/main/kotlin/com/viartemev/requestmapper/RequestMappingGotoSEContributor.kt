@@ -57,11 +57,12 @@ class RequestMappingGotoSEContributor(event: AnActionEvent) : AbstractGotoSECont
             override fun getListCellRendererComponent(list: JList<*>, value: Any, index: Int, isSelected: Boolean, cellHasFocus: Boolean): Component {
                 if (value !is RequestMappingItem) return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus)
                 removeAll()
-                val component = RequestMappingModel.MyLeftRenderer(MatcherHolder.getAssociatedMatcher(list))
-                    .getListCellRendererComponent(list, value, index, isSelected, cellHasFocus)
-                add(component, BorderLayout.WEST)
-                background = component.background
                 addRightModuleComponent(value, list, isSelected)
+                val leftRenderer = RequestMappingModel.MyLeftRenderer(MatcherHolder.getAssociatedMatcher(list))
+                    .getListCellRendererComponent(list, value, index, isSelected, cellHasFocus)
+                add(leftRenderer, BorderLayout.WEST)
+                accessibleContext = leftRenderer.accessibleContext
+                background = leftRenderer.background
                 return this
             }
         }

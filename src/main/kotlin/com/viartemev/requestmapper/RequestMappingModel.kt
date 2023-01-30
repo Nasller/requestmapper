@@ -62,13 +62,13 @@ class RequestMappingModel(project: Project, contributors: List<ChooseByNameContr
             override fun getListCellRendererComponent(list: JList<*>, value: Any, index: Int, isSelected: Boolean, cellHasFocus: Boolean): Component {
                 if (value !is RequestMappingItem) return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus)
                 removeAll()
+                addRightModuleComponent(value, list, isSelected)
                 val leftRenderer = MyLeftRenderer(MatcherHolder.getAssociatedMatcher(list))
                     .getListCellRendererComponent(list, value, index, isSelected, cellHasFocus)
                 add(leftRenderer, BorderLayout.WEST)
                 accessibleContext = leftRenderer.accessibleContext
                 background = leftRenderer.background
                 border = customBorder
-                addRightModuleComponent(value, list, isSelected)
                 return this
             }
         }
