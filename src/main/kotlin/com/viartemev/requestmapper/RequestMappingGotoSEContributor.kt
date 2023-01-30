@@ -41,7 +41,7 @@ class RequestMappingGotoSEContributor(event: AnActionEvent) : AbstractGotoSECont
     }
 
     override fun getGroupName(): String {
-        return "Request Mapping"
+        return "UrlMapping"
     }
 
     override fun showInFindResults(): Boolean {
