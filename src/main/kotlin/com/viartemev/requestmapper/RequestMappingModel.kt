@@ -62,10 +62,11 @@ class RequestMappingModel(project: Project, contributors: List<ChooseByNameContr
             override fun getListCellRendererComponent(list: JList<*>, value: Any, index: Int, isSelected: Boolean, cellHasFocus: Boolean): Component {
                 if (value !is RequestMappingItem) return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus)
                 removeAll()
-                val component = MyLeftRenderer(MatcherHolder.getAssociatedMatcher(list))
+                val leftRenderer = MyLeftRenderer(MatcherHolder.getAssociatedMatcher(list))
                     .getListCellRendererComponent(list, value, index, isSelected, cellHasFocus)
-                add(component, BorderLayout.WEST)
-                background = component.background
+                add(leftRenderer, BorderLayout.WEST)
+                accessibleContext = leftRenderer.accessibleContext
+                background = leftRenderer.background
                 border = customBorder
                 addRightModuleComponent(value, list, isSelected)
                 return this
@@ -78,6 +79,7 @@ class RequestMappingModel(project: Project, contributors: List<ChooseByNameContr
             var bgColor = UIUtil.getListBackground()
             if (value is RequestMappingItem) {
                 val presentation = value.presentation as RequestMappingItem.RequestMappingItemPresentation
+                icon = presentation.getIcon(false)
                 val textAttributes = NodeRenderer.getSimpleTextAttributes(presentation).toTextAttributes()
                 val containingFile = presentation.containingFile
                 if (containingFile?.isValid == true) {
@@ -101,7 +103,6 @@ class RequestMappingModel(project: Project, contributors: List<ChooseByNameContr
                         if(presentation.getParams().isNotBlank()) " params=${presentation.getUrl()}" else "").trim()
                 if(appendInfo.isNotBlank()) append("$appendInfo ", urlPathTextAttributes)
                 append(presentation.locationString, SimpleTextAttributes.GRAYED_ATTRIBUTES)
-                icon = presentation.getIcon(false)
             } else {
                 icon = IconUtil.getEmptyIcon(false)
                 append(value.toString(), SimpleTextAttributes(SimpleTextAttributes.STYLE_PLAIN, list.foreground))
