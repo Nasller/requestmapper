@@ -12,6 +12,7 @@ import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.project.Project
 import com.intellij.util.text.MatcherHolder
+import com.intellij.util.ui.JBInsets
 import com.viartemev.requestmapper.RequestMappingModel.Companion.addRightModuleComponent
 import com.viartemev.requestmapper.contributors.RequestMappingContributor
 import java.awt.BorderLayout
@@ -58,9 +59,10 @@ class RequestMappingGotoSEContributor(event: AnActionEvent) : AbstractGotoSECont
                 if (value !is RequestMappingItem) return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus)
                 removeAll()
                 addRightModuleComponent(value, list, isSelected)
-                val leftRenderer = RequestMappingModel.MyLeftRenderer(MatcherHolder.getAssociatedMatcher(list))
-                    .getListCellRendererComponent(list, value, index, isSelected, cellHasFocus)
-                add(leftRenderer, BorderLayout.WEST)
+                val leftRenderer = RequestMappingModel.MyLeftRenderer(MatcherHolder.getAssociatedMatcher(list)).apply {
+                    ipad = JBInsets.create(1, 0)
+                }
+                add(leftRenderer.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus), BorderLayout.WEST)
                 accessibleContext = leftRenderer.accessibleContext
                 background = leftRenderer.background
                 return this
