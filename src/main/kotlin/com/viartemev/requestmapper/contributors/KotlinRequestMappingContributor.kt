@@ -11,7 +11,6 @@ class KotlinRequestMappingContributor : RequestMappingByNameContributor() {
     override fun getAnnotationSearchers(annotationName: String, scope: GlobalSearchScope): Sequence<PsiAnnotation> {
         val project = scope.project ?: return emptySequence()
         return KotlinAnnotationsIndex
-            .getInstance()
             .get(annotationName, project, scope)
             .asSequence()
             .mapNotNull { it.toLightAnnotation() }
