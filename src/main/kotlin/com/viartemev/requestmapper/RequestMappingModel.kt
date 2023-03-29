@@ -124,7 +124,7 @@ class RequestMappingModel(project: Project, contributors: List<ChooseByNameContr
         private val customBorder = Borders.empty(2,0)
 
         fun JComponent.addRightModuleComponent(value: RequestMappingItem,list: JList<*>, isSelected: Boolean) {
-            SlowOperations.allowSlowOperations(SlowOperations.RENDERING).use {
+            SlowOperations.startSection(SlowOperations.RENDERING).use {
                 PsiElementListCellRenderer.getModuleTextWithIcon(value.targetElement)
             }?.let{
                 add(JLabel(it.text, it.icon, SwingConstants.RIGHT).apply {
