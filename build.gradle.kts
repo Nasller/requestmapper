@@ -12,20 +12,6 @@ plugins {
 group = properties("pluginGroup")
 version = properties("pluginVersion")
 
-dependencies {
-    testImplementation("org.spekframework.spek2:spek-dsl-jvm:2.0.18") {
-        exclude("org.jetbrains.kotlin")
-    }
-    testRuntimeOnly("org.spekframework.spek2:spek-runner-junit5:2.0.18") {
-        exclude("org.junit.platform")
-        exclude("org.jetbrains.kotlin")
-    }
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.2")
-    testImplementation("org.mockito.kotlin:mockito-kotlin:4.1.0")
-    testImplementation("org.amshove.kluent:kluent:1.72")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.8.2")
-}
-
 // Configure Gradle IntelliJ Plugin - read more: https://github.com/JetBrains/gradle-intellij-plugin
 intellij {
     pluginName.set(properties("pluginName"))
