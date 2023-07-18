@@ -39,9 +39,7 @@ intellij {
 }
 
 kotlin {
-    jvmToolchain {
-        languageVersion.set(JavaLanguageVersion.of(properties("javaVersion")))
-    }
+    jvmToolchain(properties("javaVersion").toInt())
 }
 
 tasks {
