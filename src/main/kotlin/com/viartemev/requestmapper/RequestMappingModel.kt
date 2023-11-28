@@ -22,7 +22,6 @@ import com.intellij.psi.PsiFile
 import com.intellij.ui.*
 import com.intellij.ui.speedSearch.SpeedSearchUtil
 import com.intellij.util.IconUtil
-import com.intellij.util.SlowOperations
 import com.intellij.util.text.Matcher
 import com.intellij.util.text.MatcherHolder
 import com.intellij.util.ui.JBUI.Borders
@@ -39,7 +38,7 @@ class RequestMappingModel(project: Project, contributors: List<ChooseByNameContr
 
     override fun getPromptText(): String = "Enter mapping url"
 
-    override fun getNotInMessage(): String = IdeUICustomization.getInstance().projectMessage("label.no.matches.found.in.project")
+    override fun getNotInMessage(): String = IdeUICustomization.getInstance().projectMessage("label.no.matches.found.in.project", project.name)
 
     override fun getNotFoundMessage(): String = IdeBundle.message("label.no.matches.found")
 
@@ -124,9 +123,7 @@ class RequestMappingModel(project: Project, contributors: List<ChooseByNameContr
         private val customBorder = Borders.empty(2,0)
 
         fun JComponent.addRightModuleComponent(value: RequestMappingItem,list: JList<*>, isSelected: Boolean) {
-            SlowOperations.startSection(SlowOperations.RENDERING).use {
-                PsiElementListCellRenderer.getModuleTextWithIcon(value.targetElement)
-            }?.let{
+            PsiElementListCellRenderer.getModuleTextWithIcon(value.targetElement)?.let{
                 add(JLabel(it.text, it.icon, SwingConstants.RIGHT).apply {
                     horizontalTextPosition = SwingConstants.LEFT
                     foreground = if (isSelected) list.foreground else UIUtil.getInactiveTextColor()

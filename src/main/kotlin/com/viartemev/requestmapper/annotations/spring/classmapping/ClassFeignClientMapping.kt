@@ -4,7 +4,7 @@ import com.intellij.psi.PsiAnnotation
 import com.viartemev.requestmapper.annotations.PathAnnotation
 import com.viartemev.requestmapper.annotations.spring.SpringMappingAnnotation
 
-class ClassFeignClientMapping(val annotation: PsiAnnotation) : SpringClassMappingAnnotation {
+class ClassFeignClientMapping(private val annotation: PsiAnnotation) : SpringClassMappingAnnotation {
     override fun fetchClassMapping(): List<ClassMappingData> {
         val pathAnnotation = PathAnnotation(annotation)
         var url = pathAnnotation.fetchMappings(SpringMappingAnnotation.URL).firstOrNull() ?: ""
