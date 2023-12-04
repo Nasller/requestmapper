@@ -1,5 +1,5 @@
 <idea-plugin>
-    <id>com.viartemev.requestmapper</id>
+    <id>com.nasller.requestmapper</id>
     <name>Request Mapper</name>
     <vendor email="nasller@qq.com" url="https://github.com/Nasller">Nasller</vendor>
 
@@ -20,7 +20,7 @@
 
     <change-notes><![CDATA[
         <ul>
-            <li>Optimize</li>
+            <li>Bring back Request mapper in NewUI</li>
         </ul>
     ]]>
     </change-notes>
@@ -30,24 +30,24 @@
     <depends optional="true" config-file="pluginKotlin.xml">org.jetbrains.kotlin</depends>
 
     <actions>
-        <action id="GoToRequestMapping" class="com.viartemev.requestmapper.actions.GoToRequestMappingAction" text="Request Mapping...">
+        <action id="GoToRequestMapping" class="com.nasller.requestmapper.actions.GoToRequestMappingAction" text="Request Mapping...">
             <add-to-group group-id="GoToTargetEx" anchor="last"/>
             <keyboard-shortcut keymap="$default" first-keystroke="ctrl BACK_SLASH"/>
         </action>
-        <action id="RequestMappingSearchEveryWhereAction" class="com.viartemev.requestmapper.actions.RequestMappingSearchEveryWhereAction" text="Request Mapping SearchEveryWhere">
+        <action id="RequestMappingSearchEveryWhereAction" class="com.nasller.requestmapper.actions.RequestMappingSearchEveryWhereAction" text="Request Mapping SearchEveryWhere">
             <keyboard-shortcut keymap="$default" first-keystroke="ctrl shift alt BACK_SLASH"/>
         </action>
     </actions>
 
     <extensionPoints>
-        <extensionPoint name="requestMappingContributor" interface="com.viartemev.requestmapper.contributors.RequestMappingContributor"/>
+        <extensionPoint name="requestMappingContributor" interface="com.nasller.requestmapper.contributors.RequestMappingContributor"/>
     </extensionPoints>
 
     <extensions defaultExtensionNs="com.intellij">
-        <searchEverywhereContributor implementation="com.viartemev.requestmapper.RequestMappingGotoSEContributor$Factory"/>
+        <searchEverywhereContributor implementation="com.nasller.requestmapper.RequestMappingGotoSEContributor$Factory"/>
     </extensions>
 
-    <extensions defaultExtensionNs="com.viartemev.requestmapper">
-        <requestMappingContributor implementation="com.viartemev.requestmapper.contributors.JavaRequestMappingContributor"/>
+    <extensions defaultExtensionNs="com.nasller.requestmapper">
+        <requestMappingContributor implementation="com.nasller.requestmapper.contributors.JavaRequestMappingContributor"/>
     </extensions>
 </idea-plugin>

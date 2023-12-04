@@ -1,5 +1,5 @@
 <idea-plugin>
-    <extensions defaultExtensionNs="com.viartemev.requestmapper">
-        <requestMappingContributor implementation="com.viartemev.requestmapper.contributors.KotlinRequestMappingContributor"/>
+    <extensions defaultExtensionNs="com.nasller.requestmapper">
+        <requestMappingContributor implementation="com.nasller.requestmapper.contributors.KotlinRequestMappingContributor"/>
     </extensions>
 </idea-plugin>
