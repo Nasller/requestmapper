@@ -22,7 +22,7 @@ data class Path(private val pathElements: List<PathElement>) {
             var sourcePathElements = sourcePath.pathElements
             var targetPathElements = targetPath.pathElements
 
-            // align by right if pattern is longer
+            // align by right if a pattern is longer
             val subtractSizeOfPath = targetPathElements.size - sourcePathElements.size
             val addDrop = if (subtractSizeOfPath > 0) subtractSizeOfPath else 0
 
@@ -37,18 +37,15 @@ data class Path(private val pathElements: List<PathElement>) {
             if (sourcePathElements.size < targetPathElements.size) {
                 return false
             }
-
             val hasExactMatching = sourcePathElements.subList(0, targetPathElements.size).any { !it.isPathVariable }
             val pathElementsAreEqual = sourcePathElements
                 .zip(targetPathElements)
                 .all { (popupElement, searchPattern) ->
                     popupElement.compareToSearchPattern(searchPattern) || popupElement.value.startsWith(searchPattern.value)
                 }
-
             if (pathElementsAreEqual && (hasExactMatching || allSourceElementsArePathVariables)) {
                 return true
             }
-
             return containsAll(sourcePathElements.drop(1), targetPathElements, allSourceElementsArePathVariables)
         }
     }

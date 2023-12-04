@@ -4,13 +4,13 @@ import com.nasller.requestmapper.utils.addCurlyBrackets
 import com.nasller.requestmapper.utils.inCurlyBrackets
 import com.nasller.requestmapper.utils.isNumeric
 import com.nasller.requestmapper.utils.unquoteCurlyBrackets
-import org.apache.commons.lang.StringEscapeUtils
 
 class PathElement(val value: String) {
     val isPathVariable: Boolean = value.inCurlyBrackets()
 
-    fun addPathVariableType(type: String) = if (isPathVariable) PathElement(value.unquoteCurlyBrackets().let { "${if (type.isBlank()) "String" else type}:$it" }.addCurlyBrackets())
-    else this
+    fun addPathVariableType(type: String) = if (isPathVariable) PathElement(value.unquoteCurlyBrackets().let {
+        "${type.ifBlank { "String" }}:$it"
+    }.addCurlyBrackets()) else this
 
     private fun compareWithPathVariable(pathElement: PathElement, searchPattern: PathElement): Boolean =
         if (pathElement.isPathVariable && searchPattern.isPathVariable) {
@@ -20,14 +20,14 @@ class PathElement(val value: String) {
         }
 
     private fun comparePathVariables(searchPattern: PathElement, pathElement: PathElement): Boolean {
-        val searchPatternValue = StringEscapeUtils.unescapeJava(searchPattern.value.unquoteCurlyBrackets().substringAfterLast(':'))
-        val pathElementValue = StringEscapeUtils.unescapeJava(pathElement.value.unquoteCurlyBrackets().substringAfterLast(':'))
+        val searchPatternValue = searchPattern.value.unquoteCurlyBrackets().substringAfterLast(':')
+        val pathElementValue = pathElement.value.unquoteCurlyBrackets().substringAfterLast(':')
         return pathElementValue.contains(searchPatternValue)
     }
 
     private fun compareSearchElementWithPathElement(searchPattern: PathElement, pathElement: PathElement): Boolean {
         if (pathElement.value.count { it == ':' } > 1) {
-            val regexString = StringEscapeUtils.unescapeJava(pathElement.value.unquoteCurlyBrackets().substringAfterLast(':'))
+            val regexString = pathElement.value.unquoteCurlyBrackets().substringAfterLast(':')
             return regexString.toRegex().matches(searchPattern.value)
         }
         val bothAreNumbers = isDigit(pathElement.value) && searchPattern.value.isNumeric()
@@ -46,15 +46,12 @@ class PathElement(val value: String) {
         "long" -> true
         "float" -> true
         "double" -> true
-
         "Integer" -> true
         "Long" -> true
         "Float" -> true
         "Double" -> true
-
         "BigInteger" -> true
         "BigDecimal" -> true
-
         else -> false
     }
 
@@ -70,9 +67,7 @@ class PathElement(val value: String) {
 
         other as PathElement
 
-        if (value != other.value) return false
-
-        return true
+        return value == other.value
     }
 
     override fun hashCode(): Int {
