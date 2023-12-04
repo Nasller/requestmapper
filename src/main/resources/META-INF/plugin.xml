@@ -4,7 +4,16 @@
     <vendor email="nasller@qq.com" url="https://github.com/Nasller">Nasller</vendor>
 
     <description><![CDATA[
-      Plugin for quick navigation to url mapping declaration.<br/>
+      <ul>
+      Plugin for quick navigation to url mapping declaration.
+      Usage:
+      <ul>
+        <li>Search everywhere (<code>Shift</code> twice)</li>
+        <li>Keyboard shortcuts:</li>
+        <li>MacOS: <code>Cmd + Back slash</code></li>
+        <li>Linux: <code>Ctrl + Back slash</code></li>
+        <li>Windows: <code>Ctrl + Back slash</code></li>
+      </ul>
       Supported languages:
       <ul>
         <li>Java</li>
