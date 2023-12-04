@@ -10,8 +10,7 @@ import org.jetbrains.kotlin.idea.stubindex.KotlinAnnotationsIndex
 class KotlinRequestMappingContributor : RequestMappingByNameContributor() {
     override fun getAnnotationSearchers(annotationName: String, scope: GlobalSearchScope): Sequence<PsiAnnotation> {
         val project = scope.project ?: return emptySequence()
-        return KotlinAnnotationsIndex
-            .get(annotationName, project, scope)
+        return KotlinAnnotationsIndex[annotationName, project, scope]
             .asSequence()
             .mapNotNull { it.toLightAnnotation() }
     }
