@@ -59,6 +59,7 @@
 
     <extensions defaultExtensionNs="com.intellij">
         <searchEverywhereContributor implementation="com.nasller.requestmapper.RequestMappingGotoSEContributor$Factory"/>
+        <projectService serviceImplementation="com.nasller.requestmapper.config.RequestMapperGotoUrlConfiguration"/>
     </extensions>
 
     <extensions defaultExtensionNs="com.nasller.requestmapper">

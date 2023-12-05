@@ -11,6 +11,7 @@ import com.intellij.openapi.project.DumbAware
 import com.intellij.util.ui.JBInsets
 import com.nasller.requestmapper.RequestMappingItem
 import com.nasller.requestmapper.RequestMappingModel
+import com.nasller.requestmapper.config.RequestMapperGotoUrlConfiguration
 import com.nasller.requestmapper.contributors.RequestMappingContributor
 import java.awt.Component
 import java.awt.Insets
@@ -36,9 +37,7 @@ class GoToRequestMappingAction : GotoActionBase(), DumbAware {
                         }
                     }
                 }
-                return object : ChooseByNameLanguageFilter(popup, model, object : ChooseByNameFilterConfiguration<LanguageRef>() {
-                    override fun nameForElement(type: LanguageRef?) = type?.displayName ?: ""
-                }, project) {
+                return object : ChooseByNameLanguageFilter(popup, model, RequestMapperGotoUrlConfiguration.getInstance(project), project) {
                     override fun getAllFilterValues() = RequestMappingContributor.getExtensions().map(RequestMappingContributor::getLanguageRef)
                 }
             }

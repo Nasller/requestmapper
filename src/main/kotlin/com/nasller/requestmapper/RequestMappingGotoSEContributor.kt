@@ -5,7 +5,6 @@ import com.intellij.ide.actions.searcheverywhere.AbstractGotoSEContributor
 import com.intellij.ide.actions.searcheverywhere.PersistentSearchEverywhereContributorFilter
 import com.intellij.ide.actions.searcheverywhere.SearchEverywhereContributorFactory
 import com.intellij.ide.util.gotoByName.FilteringGotoByModel
-import com.intellij.ide.util.gotoByName.GotoClassSymbolConfiguration
 import com.intellij.ide.util.gotoByName.LanguageRef
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
@@ -13,6 +12,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.util.text.MatcherHolder
 import com.intellij.util.ui.JBInsets
 import com.nasller.requestmapper.RequestMappingModel.Companion.addRightModuleComponent
+import com.nasller.requestmapper.config.RequestMapperGotoUrlConfiguration
 import com.nasller.requestmapper.contributors.RequestMappingContributor
 import java.awt.BorderLayout
 import java.awt.Component
@@ -20,13 +20,10 @@ import javax.swing.JList
 import javax.swing.ListCellRenderer
 
 class RequestMappingGotoSEContributor(event: AnActionEvent) : AbstractGotoSEContributor(event) {
-    val project: Project = myProject
-    private val myFilter: PersistentSearchEverywhereContributorFilter<LanguageRef>
-    init {
-        val items = RequestMappingContributor.getExtensions().map(RequestMappingContributor::getLanguageRef)
-        val persistentConfig = GotoClassSymbolConfiguration.getInstance(myProject)
-        myFilter = PersistentSearchEverywhereContributorFilter(items, persistentConfig, LanguageRef::displayName, LanguageRef::icon)
-    }
+    private val myFilter: PersistentSearchEverywhereContributorFilter<LanguageRef> = PersistentSearchEverywhereContributorFilter(
+        RequestMappingContributor.getExtensions().map(RequestMappingContributor::getLanguageRef),
+        RequestMapperGotoUrlConfiguration.getInstance(myProject),
+        LanguageRef::displayName, LanguageRef::icon)
 
     override fun getSearchProviderId(): String = SEARCH_PROVIDER_ID
 
