@@ -28,6 +28,11 @@
     ]]></description>
 
     <change-notes><![CDATA[
+        <h3>1.4</h3>
+        <ul>
+            <li>Allow multiple selection</li>
+            <li>Show in find tool</li>
+        </ul>
         <ul>
             <li>Bring back Request mapper in NewUI</li>
         </ul>

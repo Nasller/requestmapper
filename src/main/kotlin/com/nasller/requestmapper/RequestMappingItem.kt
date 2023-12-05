@@ -2,6 +2,8 @@ package com.nasller.requestmapper
 
 import com.intellij.navigation.ItemPresentation
 import com.intellij.navigation.PsiElementNavigationItem
+import com.intellij.openapi.actionSystem.CommonDataKeys
+import com.intellij.openapi.actionSystem.DataProvider
 import com.intellij.openapi.util.Iconable
 import com.intellij.pom.Navigatable
 import com.intellij.psi.PsiClass
@@ -16,7 +18,7 @@ class RequestMappingItem(
     private val urlPath: String,
     private val requestMethod: String,
     private val params: String = "",
-) : PsiElementNavigationItem {
+) : DataProvider, PsiElementNavigationItem {
     private val navigationElement = psiElement.navigationElement as? Navigatable
 
     override fun getName() = urlPath
@@ -33,6 +35,13 @@ class RequestMappingItem(
 
     override fun toString() =
         "RequestMappingItem(psiElement=$psiElement, requestMethod='$requestMethod', url='$url', urlPath='$urlPath', params='$params', navigationElement=$navigationElement)"
+
+    override fun getData(dataId: String): Any? {
+        return when (dataId) {
+            CommonDataKeys.PSI_ELEMENT.name -> psiElement
+            else -> null
+        }
+    }
 
     internal class RequestMappingItemPresentation(private val item: RequestMappingItem) : ItemPresentation {
         val containingFile: PsiFile? = item.targetElement.containingFile

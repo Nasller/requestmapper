@@ -46,6 +46,6 @@ class GoToRequestMappingAction : GotoActionBase(), DumbAware {
                     element.navigate(true)
                 }
             }
-        }, null, popup, false)
+        }, "Request mapper url", popup, true)
     }
 }

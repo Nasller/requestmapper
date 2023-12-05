@@ -45,9 +45,7 @@ class RequestMappingGotoSEContributor(event: AnActionEvent) : AbstractGotoSECont
         return "UrlMapping"
     }
 
-    override fun showInFindResults(): Boolean {
-        return false
-    }
+    override fun showInFindResults() = true
 
     override fun getActions(onChanged: Runnable): List<AnAction> {
         return doGetActions(myFilter, null, onChanged)
