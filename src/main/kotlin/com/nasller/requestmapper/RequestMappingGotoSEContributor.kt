@@ -3,7 +3,6 @@ package com.nasller.requestmapper
 import com.intellij.ide.actions.SearchEverywherePsiRenderer
 import com.intellij.ide.actions.searcheverywhere.AbstractGotoSEContributor
 import com.intellij.ide.actions.searcheverywhere.PersistentSearchEverywhereContributorFilter
-import com.intellij.ide.actions.searcheverywhere.SearchEverywhereContributor
 import com.intellij.ide.actions.searcheverywhere.SearchEverywhereContributorFactory
 import com.intellij.ide.util.gotoByName.FilteringGotoByModel
 import com.intellij.ide.util.gotoByName.GotoClassSymbolConfiguration
@@ -29,7 +28,7 @@ class RequestMappingGotoSEContributor(event: AnActionEvent) : AbstractGotoSECont
         myFilter = PersistentSearchEverywhereContributorFilter(items, persistentConfig, LanguageRef::displayName, LanguageRef::icon)
     }
 
-    override fun getSearchProviderId(): String = SearchProviderId
+    override fun getSearchProviderId(): String = SEARCH_PROVIDER_ID
 
     override fun createModel(project: Project): FilteringGotoByModel<*> {
         val model = RequestMappingModel(project, RequestMappingContributor.getExtensions())
@@ -37,19 +36,13 @@ class RequestMappingGotoSEContributor(event: AnActionEvent) : AbstractGotoSECont
         return model
     }
 
-    override fun getSortWeight(): Int {
-        return 1000
-    }
+    override fun getSortWeight() = 1000
 
-    override fun getGroupName(): String {
-        return "UrlMapping"
-    }
+    override fun getGroupName() = "UrlMapping"
 
     override fun showInFindResults() = true
 
-    override fun getActions(onChanged: Runnable): List<AnAction> {
-        return doGetActions(myFilter, null, onChanged)
-    }
+    override fun getActions(onChanged: Runnable): List<AnAction> = doGetActions(myFilter, null, onChanged)
 
     override fun getElementsRenderer(): ListCellRenderer<Any> {
         return object : SearchEverywherePsiRenderer(this) {
@@ -69,12 +62,10 @@ class RequestMappingGotoSEContributor(event: AnActionEvent) : AbstractGotoSECont
     }
 
     companion object{
-        const val SearchProviderId = "SearchEverywhere.RequestMapping"
+        const val SEARCH_PROVIDER_ID = "SearchEverywhere.RequestMapping"
     }
 
     class Factory : SearchEverywhereContributorFactory<Any> {
-        override fun createContributor(initEvent: AnActionEvent): SearchEverywhereContributor<Any> {
-            return RequestMappingGotoSEContributor(initEvent)
-        }
+        override fun createContributor(initEvent: AnActionEvent) = RequestMappingGotoSEContributor(initEvent)
     }
 }

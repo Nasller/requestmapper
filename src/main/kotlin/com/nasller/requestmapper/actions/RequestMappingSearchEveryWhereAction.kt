@@ -8,7 +8,7 @@ import com.nasller.requestmapper.RequestMappingGotoSEContributor
 
 class RequestMappingSearchEveryWhereAction : SearchEverywhereBaseAction(), DumbAware {
     override fun actionPerformed(e: AnActionEvent) {
-        showInSearchEverywherePopup(RequestMappingGotoSEContributor.SearchProviderId, e, true, false)
+        showInSearchEverywherePopup(RequestMappingGotoSEContributor.SEARCH_PROVIDER_ID, e, true, false)
     }
 
     override fun getActionUpdateThread(): ActionUpdateThread {

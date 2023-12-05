@@ -2,9 +2,7 @@ package com.nasller.requestmapper.actions
 
 import com.intellij.ide.actions.GotoActionBase
 import com.intellij.ide.ui.laf.darcula.ui.DarculaEditorTextFieldBorder
-import com.intellij.ide.util.gotoByName.ChooseByNameFilter
-import com.intellij.ide.util.gotoByName.ChooseByNameModelEx
-import com.intellij.ide.util.gotoByName.ChooseByNamePopup
+import com.intellij.ide.util.gotoByName.*
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys.PROJECT
 import com.intellij.openapi.actionSystem.CustomShortcutSet
@@ -27,8 +25,8 @@ class GoToRequestMappingAction : GotoActionBase(), DumbAware {
         val popup = CustomChooseByNamePopup.createPopup(project, model,
             ChooseByNameModelEx.getItemProvider(model, getPsiContext(e)), start.first,
             model.willOpenEditor() && FileEditorManagerEx.getInstanceEx(project).hasSplitOrUndockedWindows(), start.second)
-        showNavigationPopup(object : GotoActionCallback<String>() {
-            override fun createFilter(popup: ChooseByNamePopup): ChooseByNameFilter<String>? {
+        showNavigationPopup(object : GotoActionCallback<LanguageRef>() {
+            override fun createFilter(popup: ChooseByNamePopup): ChooseByNameFilter<LanguageRef> {
                 popup.setCheckBoxShortcut(CustomShortcutSet.EMPTY)
                 popup.textField.apply {
                     columns = 100
@@ -38,7 +36,11 @@ class GoToRequestMappingAction : GotoActionBase(), DumbAware {
                         }
                     }
                 }
-                return super.createFilter(popup)
+                return object : ChooseByNameLanguageFilter(popup, model, object : ChooseByNameFilterConfiguration<LanguageRef>() {
+                    override fun nameForElement(type: LanguageRef?) = type?.displayName ?: ""
+                }, project) {
+                    override fun getAllFilterValues() = RequestMappingContributor.getExtensions().map(RequestMappingContributor::getLanguageRef)
+                }
             }
 
             override fun elementChosen(popup: ChooseByNamePopup, element: Any) {
