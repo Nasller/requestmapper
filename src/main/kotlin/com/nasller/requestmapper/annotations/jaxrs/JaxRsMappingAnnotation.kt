@@ -14,7 +14,7 @@ import com.nasller.requestmapper.model.PathParameter
 import com.nasller.requestmapper.utils.fetchAnnotatedMethod
 
 abstract class JaxRsMappingAnnotation(
-    val psiAnnotation: PsiAnnotation,
+    private val psiAnnotation: PsiAnnotation,
     private val urlFormatter: UrlFormatter = JaxRsUrlFormatter
 ) : MappingAnnotation {
 
@@ -60,11 +60,11 @@ abstract class JaxRsMappingAnnotation(
         return when (val pathVariableValue = annotation.findAttributeValue(ATTRIBUTE_NAME)) {
             is PsiLiteralExpression -> {
                 val expression = extractExpression(pathVariableValue)
-                if (expression.isNotBlank()) expression else defaultValue
+                expression.ifBlank { defaultValue }
             }
             is PsiReferenceExpression -> {
                 val expression = extractExpression(pathVariableValue)
-                if (expression.isNotBlank()) expression else defaultValue
+                expression.ifBlank { defaultValue }
             }
             else -> defaultValue
         }

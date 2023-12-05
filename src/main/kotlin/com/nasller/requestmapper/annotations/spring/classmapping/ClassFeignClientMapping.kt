@@ -16,7 +16,7 @@ class ClassFeignClientMapping(private val annotation: PsiAnnotation) : SpringCla
                 pathAnnotation.fetchMappings(SpringMappingAnnotation.NAME).firstOrNull() ?: ""
             } else value
         }
-        return listOf(ClassMappingData(url,getCleanPath(path)))
+        return listOf(ClassMappingData(url, getCleanPath(path)))
     }
 
     // analogue from org.springframework.cloud.openfeign.FeignClientFactoryBean#cleanPath
