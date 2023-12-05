@@ -1,9 +1,10 @@
 package com.nasller.requestmapper
 
 import com.intellij.ide.IdeBundle
+import com.intellij.ide.util.ModuleRendererFactory
 import com.intellij.ide.util.NavigationItemListCellRenderer
+import com.intellij.ide.util.PlatformModuleRendererFactory
 import com.intellij.ide.util.PropertiesComponent
-import com.intellij.ide.util.PsiElementListCellRenderer
 import com.intellij.ide.util.gotoByName.FilteringGotoByModel
 import com.intellij.ide.util.gotoByName.LanguageRef
 import com.intellij.ide.util.treeView.NodeRenderer
@@ -22,6 +23,7 @@ import com.intellij.psi.PsiFile
 import com.intellij.ui.*
 import com.intellij.ui.speedSearch.SpeedSearchUtil
 import com.intellij.util.IconUtil
+import com.intellij.util.TextWithIcon
 import com.intellij.util.text.Matcher
 import com.intellij.util.text.MatcherHolder
 import com.intellij.util.ui.JBUI.Borders
@@ -123,12 +125,20 @@ class RequestMappingModel(project: Project, contributors: List<ChooseByNameContr
         private val customBorder = Borders.empty(2,0)
 
         fun JComponent.addRightModuleComponent(value: RequestMappingItem,list: JList<*>, isSelected: Boolean) {
-            PsiElementListCellRenderer.getModuleTextWithIcon(value.targetElement)?.let{
+            getModuleTextWithIcon(value.targetElement)?.let{
                 add(JLabel(it.text, it.icon, SwingConstants.RIGHT).apply {
                     horizontalTextPosition = SwingConstants.LEFT
                     foreground = if (isSelected) list.foreground else UIUtil.getInactiveTextColor()
                 }, BorderLayout.EAST)
             }
+        }
+
+        private fun getModuleTextWithIcon(value: Any?): TextWithIcon? {
+            val factory = ModuleRendererFactory.findInstance(value)
+            return if (factory is PlatformModuleRendererFactory) {
+                // it won't display any new information
+                null
+            } else factory.getModuleTextWithIcon(value)
         }
 
         private fun getVirtualFile(containingFile: PsiFile): VirtualFile? {
