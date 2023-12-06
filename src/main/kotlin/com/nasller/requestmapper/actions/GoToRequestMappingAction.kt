@@ -2,7 +2,10 @@ package com.nasller.requestmapper.actions
 
 import com.intellij.ide.actions.GotoActionBase
 import com.intellij.ide.ui.laf.darcula.ui.DarculaEditorTextFieldBorder
-import com.intellij.ide.util.gotoByName.*
+import com.intellij.ide.util.gotoByName.ChooseByNameFilter
+import com.intellij.ide.util.gotoByName.ChooseByNameModelEx
+import com.intellij.ide.util.gotoByName.ChooseByNamePopup
+import com.intellij.ide.util.gotoByName.LanguageRef
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys.PROJECT
 import com.intellij.openapi.actionSystem.CustomShortcutSet
@@ -37,7 +40,11 @@ class GoToRequestMappingAction : GotoActionBase(), DumbAware {
                         }
                     }
                 }
-                return object : ChooseByNameLanguageFilter(popup, model, RequestMapperGotoUrlConfiguration.getInstance(project), project) {
+                return object : ChooseByNameFilter<LanguageRef>(popup, model, RequestMapperGotoUrlConfiguration.getInstance(project), project) {
+                    override fun textForFilterValue(value: LanguageRef) = value.displayName
+
+                    override fun iconForFilterValue(value: LanguageRef) = value.icon
+
                     override fun getAllFilterValues() = RequestMappingContributor.getExtensions().map(RequestMappingContributor::getLanguageRef)
                 }
             }
