@@ -11,7 +11,7 @@ class JavaRequestMappingContributor : RequestMappingByNameContributor() {
         val project = scope.project ?: return emptySequence()
         return JavaAnnotationIndex
             .getInstance()
-            .get(annotationName, project, scope)
+            .getAnnotations(annotationName, project, scope)
             .asSequence()
     }
 
