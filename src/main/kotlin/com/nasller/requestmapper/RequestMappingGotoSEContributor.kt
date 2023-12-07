@@ -8,6 +8,7 @@ import com.intellij.ide.util.gotoByName.FilteringGotoByModel
 import com.intellij.ide.util.gotoByName.LanguageRef
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
+import com.intellij.openapi.application.runReadAction
 import com.intellij.openapi.project.Project
 import com.intellij.util.text.MatcherHolder
 import com.intellij.util.ui.JBInsets
@@ -45,15 +46,17 @@ class RequestMappingGotoSEContributor(event: AnActionEvent) : AbstractGotoSECont
         return object : SearchEverywherePsiRenderer(this) {
             override fun getListCellRendererComponent(list: JList<*>, value: Any, index: Int, isSelected: Boolean, cellHasFocus: Boolean): Component {
                 if (value !is RequestMappingItem) return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus)
-                removeAll()
-                addRightModuleComponent(value, list, isSelected)
-                val leftRenderer = RequestMappingModel.MyLeftRenderer(MatcherHolder.getAssociatedMatcher(list)).apply {
-                    ipad = JBInsets.create(1, 0)
+                return runReadAction {
+                    removeAll()
+                    addRightModuleComponent(value, list, isSelected)
+                    val leftRenderer = RequestMappingModel.MyLeftRenderer(MatcherHolder.getAssociatedMatcher(list)).apply {
+                        ipad = JBInsets.create(1, 0)
+                    }
+                    add(leftRenderer.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus), BorderLayout.WEST)
+                    accessibleContext = leftRenderer.accessibleContext
+                    background = leftRenderer.background
+                    return@runReadAction this
                 }
-                add(leftRenderer.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus), BorderLayout.WEST)
-                accessibleContext = leftRenderer.accessibleContext
-                background = leftRenderer.background
-                return this
             }
         }
     }

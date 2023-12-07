@@ -10,6 +10,7 @@ import com.intellij.ide.util.treeView.NodeRenderer
 import com.intellij.navigation.ChooseByNameContributorEx
 import com.intellij.navigation.NavigationItem
 import com.intellij.navigation.NavigationItemFileStatus
+import com.intellij.openapi.application.runReadAction
 import com.intellij.openapi.editor.markup.EffectType
 import com.intellij.openapi.editor.markup.TextAttributes
 import com.intellij.openapi.project.DumbAware
@@ -60,15 +61,17 @@ class RequestMappingModel(project: Project, contributors: List<ChooseByNameContr
         return object : NavigationItemListCellRenderer() {
             override fun getListCellRendererComponent(list: JList<*>, value: Any, index: Int, isSelected: Boolean, cellHasFocus: Boolean): Component {
                 if (value !is RequestMappingItem) return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus)
-                removeAll()
-                addRightModuleComponent(value, list, isSelected)
-                val leftRenderer = MyLeftRenderer(MatcherHolder.getAssociatedMatcher(list))
-                    .getListCellRendererComponent(list, value, index, isSelected, cellHasFocus)
-                add(leftRenderer, BorderLayout.WEST)
-                accessibleContext = leftRenderer.accessibleContext
-                background = leftRenderer.background
-                border = customBorder
-                return this
+                return runReadAction {
+                    removeAll()
+                    addRightModuleComponent(value, list, isSelected)
+                    val leftRenderer = MyLeftRenderer(MatcherHolder.getAssociatedMatcher(list))
+                        .getListCellRendererComponent(list, value, index, isSelected, cellHasFocus)
+                    add(leftRenderer, BorderLayout.WEST)
+                    accessibleContext = leftRenderer.accessibleContext
+                    background = leftRenderer.background
+                    border = customBorder
+                    return@runReadAction this
+                }
             }
         }
     }
