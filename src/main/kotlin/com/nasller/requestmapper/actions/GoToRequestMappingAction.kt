@@ -6,6 +6,7 @@ import com.intellij.ide.util.gotoByName.ChooseByNameFilter
 import com.intellij.ide.util.gotoByName.ChooseByNameModelEx
 import com.intellij.ide.util.gotoByName.ChooseByNamePopup
 import com.intellij.ide.util.gotoByName.LanguageRef
+import com.intellij.openapi.actionSystem.ActionToolbar
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys.PROJECT
 import com.intellij.openapi.actionSystem.CustomShortcutSet
@@ -22,15 +23,13 @@ import java.awt.Insets
 class GoToRequestMappingAction : GotoActionBase(), DumbAware {
     override fun gotoActionPerformed(e: AnActionEvent) {
         val project = e.getData(PROJECT) ?: return
-        val contributors = RequestMappingContributor.getExtensions()
-        val model = RequestMappingModel(project, contributors)
-        model.setFilterItems(contributors.map(RequestMappingContributor::getLanguageRef))
+        val model = RequestMappingModel(project)
         val start = getInitialText(true, e)
         val popup = CustomChooseByNamePopup.createPopup(project, model,
             ChooseByNameModelEx.getItemProvider(model, getPsiContext(e)), start.first,
             model.willOpenEditor() && FileEditorManagerEx.getInstanceEx(project).hasSplitOrUndockedWindows(), start.second)
         showNavigationPopup(object : GotoActionCallback<LanguageRef>() {
-            override fun createFilter(popup: ChooseByNamePopup): ChooseByNameFilter<LanguageRef> {
+            override fun createFilter(popup: ChooseByNamePopup): ChooseByNameFilter<LanguageRef>? {
                 popup.setCheckBoxShortcut(CustomShortcutSet.EMPTY)
                 popup.textField.apply {
                     columns = 100
@@ -40,13 +39,16 @@ class GoToRequestMappingAction : GotoActionBase(), DumbAware {
                         }
                     }
                 }
-                return object : ChooseByNameFilter<LanguageRef>(popup, model, RequestMapperGotoUrlConfiguration.getInstance(project), project) {
+                val chooseByNameFilter = object : ChooseByNameFilter<LanguageRef>(popup, model, RequestMapperGotoUrlConfiguration.getInstance(project), project) {
                     override fun textForFilterValue(value: LanguageRef) = value.displayName
 
                     override fun iconForFilterValue(value: LanguageRef) = value.icon
 
                     override fun getAllFilterValues() = RequestMappingContributor.getExtensions().map(RequestMappingContributor::getLanguageRef)
                 }
+                val actionToolbar = FIELD.get(chooseByNameFilter) as? ActionToolbar ?: return null
+                actionToolbar.targetComponent = actionToolbar.component
+                return chooseByNameFilter
             }
 
             override fun elementChosen(popup: ChooseByNamePopup, element: Any) {
@@ -55,5 +57,11 @@ class GoToRequestMappingAction : GotoActionBase(), DumbAware {
                 }
             }
         }, "Request mapper url", popup, true)
+    }
+
+    private companion object {
+        private val FIELD = ChooseByNameFilter::class.java.getDeclaredField("myToolbar").apply {
+            isAccessible = true
+        }
     }
 }
