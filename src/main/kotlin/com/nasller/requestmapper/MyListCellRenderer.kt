@@ -38,30 +38,34 @@ import javax.swing.SwingConstants
 class MyNavigationItemListCellRenderer : NavigationItemListCellRenderer() {
     override fun getListCellRendererComponent(list: JList<*>, value: Any, index: Int, isSelected: Boolean, cellHasFocus: Boolean): Component {
         if (value !is RequestMappingItem) return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus)
-        removeAll()
-        addRightModuleComponent(value, list, isSelected)
-        val leftRenderer = MyLeftRenderer(MatcherHolder.getAssociatedMatcher(list))
-            .getListCellRendererComponent(list, value, index, isSelected, cellHasFocus)
-        add(leftRenderer, BorderLayout.WEST)
-        accessibleContext = leftRenderer.accessibleContext
-        background = leftRenderer.background
-        border = MyLeftRenderer.customBorder
-        return this
+        return runReadAction {
+            removeAll()
+            addRightModuleComponent(value, list, isSelected)
+            val leftRenderer = MyLeftRenderer(MatcherHolder.getAssociatedMatcher(list))
+                .getListCellRendererComponent(list, value, index, isSelected, cellHasFocus)
+            add(leftRenderer, BorderLayout.WEST)
+            accessibleContext = leftRenderer.accessibleContext
+            background = leftRenderer.background
+            border = MyLeftRenderer.customBorder
+            return@runReadAction this
+        }
     }
 }
 
 class MySearchEverywherePsiRenderer(disposable: Disposable) : SearchEverywherePsiRenderer(disposable) {
     override fun getListCellRendererComponent(list: JList<*>, value: Any, index: Int, isSelected: Boolean, cellHasFocus: Boolean): Component {
         if (value !is RequestMappingItem) return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus)
-        removeAll()
-        addRightModuleComponent(value, list, isSelected)
-        val leftRenderer = MyLeftRenderer(MatcherHolder.getAssociatedMatcher(list)).apply {
-            ipad = JBInsets.create(1, 0)
+        return runReadAction {
+            removeAll()
+            addRightModuleComponent(value, list, isSelected)
+            val leftRenderer = MyLeftRenderer(MatcherHolder.getAssociatedMatcher(list)).apply {
+                ipad = JBInsets.create(1, 0)
+            }
+            add(leftRenderer.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus), BorderLayout.WEST)
+            accessibleContext = leftRenderer.accessibleContext
+            background = leftRenderer.background
+            return@runReadAction this
         }
-        add(leftRenderer.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus), BorderLayout.WEST)
-        accessibleContext = leftRenderer.accessibleContext
-        background = leftRenderer.background
-        return this
     }
 }
 
