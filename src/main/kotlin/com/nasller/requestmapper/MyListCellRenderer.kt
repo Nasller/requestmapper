@@ -117,7 +117,7 @@ class MyLeftRenderer(private val myMatcher: Matcher?) : ColoredListCellRenderer<
         private val ANY = ColorUtil.fromHex("#E3FA00")
         val customBorder = JBUI.Borders.empty(2,0)
 
-        fun JComponent.addRightModuleComponent(value: RequestMappingItem, list: JList<*>, isSelected: Boolean) = runReadAction{
+        fun JComponent.addRightModuleComponent(value: RequestMappingItem, list: JList<*>, isSelected: Boolean) {
             ModuleRendererFactory.findInstance(value).getModuleTextWithIcon(value.targetElement)?.let{
                 add(JLabel(it.text, it.icon, SwingConstants.RIGHT).apply {
                     horizontalTextPosition = SwingConstants.LEFT
