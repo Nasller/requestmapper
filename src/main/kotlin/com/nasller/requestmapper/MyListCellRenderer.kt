@@ -1,25 +1,16 @@
 package com.nasller.requestmapper
 
 import com.intellij.ide.actions.SearchEverywherePsiRenderer
-import com.intellij.ide.util.ModuleRendererFactory
 import com.intellij.ide.util.NavigationItemListCellRenderer
 import com.intellij.ide.util.treeView.NodeRenderer
-import com.intellij.navigation.NavigationItemFileStatus
 import com.intellij.openapi.Disposable
-import com.intellij.openapi.application.runReadAction
-import com.intellij.openapi.editor.markup.EffectType
 import com.intellij.openapi.editor.markup.TextAttributes
-import com.intellij.openapi.vcs.FileStatus
-import com.intellij.openapi.vfs.VirtualFile
-import com.intellij.openapi.vfs.newvfs.VfsPresentationUtil
-import com.intellij.problems.WolfTheProblemSolver
-import com.intellij.psi.PsiFile
 import com.intellij.ui.ColorUtil
 import com.intellij.ui.ColoredListCellRenderer
-import com.intellij.ui.JBColor
 import com.intellij.ui.SimpleTextAttributes
 import com.intellij.ui.speedSearch.SpeedSearchUtil
 import com.intellij.util.IconUtil
+import com.intellij.util.lateinitVal
 import com.intellij.util.text.Matcher
 import com.intellij.util.text.MatcherHolder
 import com.intellij.util.ui.JBInsets
@@ -28,6 +19,7 @@ import com.intellij.util.ui.UIUtil
 import com.nasller.requestmapper.MyLeftRenderer.Companion.addRightModuleComponent
 import com.nasller.requestmapper.annotations.MappingAnnotation
 import java.awt.BorderLayout
+import java.awt.Color
 import java.awt.Component
 import java.awt.Font
 import javax.swing.JComponent
@@ -38,57 +30,44 @@ import javax.swing.SwingConstants
 class MyNavigationItemListCellRenderer : NavigationItemListCellRenderer() {
     override fun getListCellRendererComponent(list: JList<*>, value: Any, index: Int, isSelected: Boolean, cellHasFocus: Boolean): Component {
         if (value !is RequestMappingItem) return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus)
-        return runReadAction {
-            removeAll()
-            addRightModuleComponent(value, list, isSelected)
-            val leftRenderer = MyLeftRenderer(MatcherHolder.getAssociatedMatcher(list))
-                .getListCellRendererComponent(list, value, index, isSelected, cellHasFocus)
-            add(leftRenderer, BorderLayout.WEST)
-            accessibleContext = leftRenderer.accessibleContext
-            background = leftRenderer.background
-            border = MyLeftRenderer.customBorder
-            return@runReadAction this
-        }
+        removeAll()
+        addRightModuleComponent(value, list, isSelected)
+        val leftRenderer = MyLeftRenderer(MatcherHolder.getAssociatedMatcher(list))
+            .getListCellRendererComponent(list, value, index, isSelected, cellHasFocus)
+        add(leftRenderer, BorderLayout.WEST)
+        accessibleContext = leftRenderer.accessibleContext
+        background = leftRenderer.background
+        border = MyLeftRenderer.customBorder
+        return this
     }
 }
 
 class MySearchEverywherePsiRenderer(disposable: Disposable) : SearchEverywherePsiRenderer(disposable) {
     override fun getListCellRendererComponent(list: JList<*>, value: Any, index: Int, isSelected: Boolean, cellHasFocus: Boolean): Component {
         if (value !is RequestMappingItem) return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus)
-        return runReadAction {
-            removeAll()
-            addRightModuleComponent(value, list, isSelected)
-            val leftRenderer = MyLeftRenderer(MatcherHolder.getAssociatedMatcher(list)).apply {
-                ipad = JBInsets.create(1, 0)
-            }
-            add(leftRenderer.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus), BorderLayout.WEST)
-            accessibleContext = leftRenderer.accessibleContext
-            background = leftRenderer.background
-            return@runReadAction this
+        removeAll()
+        addRightModuleComponent(value, list, isSelected)
+        val leftRenderer = MyLeftRenderer(MatcherHolder.getAssociatedMatcher(list)).apply {
+            ipad = JBInsets.create(1, 0)
         }
+        add(leftRenderer.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus), BorderLayout.WEST)
+        accessibleContext = leftRenderer.accessibleContext
+        background = leftRenderer.background
+        return this
     }
 }
 
 class MyLeftRenderer(private val myMatcher: Matcher?) : ColoredListCellRenderer<Any>() {
     override fun customizeCellRenderer(list: JList<*>, value: Any, index: Int, selected: Boolean, hasFocus: Boolean) {
-        var bgColor = UIUtil.getListBackground()
+        var bgColor by lateinitVal<Color>()
         if (value is RequestMappingItem) {
             val presentation = value.presentation as RequestMappingItem.RequestMappingItemPresentation
             icon = presentation.getIcon(false)
             val textAttributes = NodeRenderer.getSimpleTextAttributes(presentation).toTextAttributes()
-            val containingFile = presentation.containingFile
-            if (containingFile?.isValid == true) {
-                getVirtualFile(containingFile)?.let {
-                    val project = value.targetElement.project
-                    VfsPresentationUtil.getFileBackgroundColor(project, it)?.apply { bgColor = this }
-                    if (WolfTheProblemSolver.getInstance(project).isProblemFile(it)) {
-                        textAttributes.effectType = EffectType.WAVE_UNDERSCORE
-                        textAttributes.effectColor = JBColor.red
-                    }
-                }
-            }
-            val status = NavigationItemFileStatus.get(value)
-            if(status !== FileStatus.NOT_CHANGED) textAttributes.foregroundColor = status.color
+            bgColor = presentation.getBgColor() ?: UIUtil.getListBackground()
+            textAttributes.effectType = presentation.getErrorEffectType() ?: textAttributes.effectType
+            textAttributes.effectColor = presentation.getErrorEffectColor() ?: textAttributes.effectColor
+            textAttributes.foregroundColor = presentation.getForegroundColor() ?: textAttributes.foregroundColor
             val urlPathTextAttributes = SimpleTextAttributes.fromTextAttributes(textAttributes)
             presentation.getRequestMethod().splitToSequence(" ").forEach {
                 append("$it ",getMethodSimpleTextAttributes(it,textAttributes))
@@ -99,6 +78,7 @@ class MyLeftRenderer(private val myMatcher: Matcher?) : ColoredListCellRenderer<
             if(appendInfo.isNotBlank()) append("$appendInfo ", urlPathTextAttributes)
             append(presentation.locationString, SimpleTextAttributes.GRAYED_ATTRIBUTES)
         } else {
+            bgColor = UIUtil.getListBackground()
             icon = IconUtil.getEmptyIcon(false)
             append(value.toString(), SimpleTextAttributes(SimpleTextAttributes.STYLE_PLAIN, list.foreground))
         }
@@ -118,23 +98,12 @@ class MyLeftRenderer(private val myMatcher: Matcher?) : ColoredListCellRenderer<
         val customBorder = JBUI.Borders.empty(2,0)
 
         fun JComponent.addRightModuleComponent(value: RequestMappingItem, list: JList<*>, isSelected: Boolean) {
-            ModuleRendererFactory.findInstance(value).getModuleTextWithIcon(value.targetElement)?.let{
+            value.textIcon?.let{
                 add(JLabel(it.text, it.icon, SwingConstants.RIGHT).apply {
                     horizontalTextPosition = SwingConstants.LEFT
                     foreground = if (isSelected) list.foreground else UIUtil.getInactiveTextColor()
                 }, BorderLayout.EAST)
             }
-        }
-
-        private fun getVirtualFile(containingFile: PsiFile): VirtualFile? {
-            var virtualFile = containingFile.virtualFile
-            if (virtualFile == null) {
-                val originalFile = containingFile.originalFile
-                if (originalFile !== containingFile && originalFile.isValid) {
-                    virtualFile = originalFile.virtualFile
-                }
-            }
-            return virtualFile
         }
 
         private fun getMethodSimpleTextAttributes(method: String,textAttributes: TextAttributes) : SimpleTextAttributes {
