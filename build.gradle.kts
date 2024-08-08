@@ -44,6 +44,7 @@ intellijPlatform {
         }
     }
     sandboxContainer = layout.projectDirectory.dir("idea-sandbox")
+    buildSearchableOptions = false
 
     publishing {
         token.set(env["PUBLISH_TOKEN"])
@@ -75,10 +76,6 @@ tasks {
         withType<KotlinCompile> {
             kotlinOptions.jvmTarget = it
         }
-    }
-
-    buildSearchableOptions {
-        enabled = false
     }
 
     wrapper {
