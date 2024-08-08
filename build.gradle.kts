@@ -1,8 +1,6 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 val env: MutableMap<String, String> = System.getenv()
 val dir: String = projectDir.parentFile.absolutePath
-fun properties(key: String) = project.findProperty(key).toString()
+fun properties(key: String) = providers.gradleProperty(key)
 
 plugins {
     // Java support
@@ -11,23 +9,56 @@ plugins {
     alias(libs.plugins.gradleIntelliJPlugin)
 }
 
-group = properties("pluginGroup")
-version = properties("pluginVersion")
+group = properties("pluginGroup").get()
+version = properties("pluginVersion").get()
 
-// Configure Gradle IntelliJ Plugin - read more: https://github.com/JetBrains/gradle-intellij-plugin
-intellij {
-    pluginName.set(properties("pluginName"))
-    version.set(properties("platformVersion"))
-    type.set(properties("platformType"))
-    sandboxDir.set("${rootProject.rootDir}/idea-sandbox")
-    downloadSources.set(true)
-    updateSinceUntilBuild.set(false)
-    // Plugin Dependencies. Uses `platformPlugins` property from the gradle.properties file.
-    plugins.set(properties("platformPlugins").split(',').map(String::trim).filter(String::isNotEmpty))
+repositories {
+    mavenCentral()
+    // IntelliJ Platform Gradle Plugin Repositories Extension - read more: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-repositories-extension.html
+    intellijPlatform {
+        defaultRepositories()
+    }
+}
+
+dependencies {
+    intellijPlatform {
+        create(properties("platformType"), properties("platformVersion"))
+
+        // Plugin Dependencies. Uses `platformBundledPlugins` property from the gradle.properties file for bundled IntelliJ Platform plugins.
+        bundledPlugins(properties("platformBundledPlugins").map { it.split(',') })
+        // Plugin Dependencies. Uses `platformPlugins` property from the gradle.properties file for plugin from JetBrains Marketplace.
+        plugins(properties("platformPlugins").map { it.split(',') })
+
+        instrumentationTools()
+        zipSigner()
+    }
+}
+
+intellijPlatform {
+    pluginConfiguration {
+        name = properties("pluginName").get()
+        version = project.version.toString()
+
+        ideaVersion {
+            sinceBuild = properties("pluginSinceBuild").get()
+        }
+    }
+    sandboxContainer = layout.projectDirectory.dir("idea-sandbox")
+
+    publishing {
+        token.set(env["PUBLISH_TOKEN"])
+        channels.set(listOf(env["PUBLISH_CHANNEL"] ?: "default"))
+    }
+
+    signing {
+        certificateChainFile.set(File(env.getOrDefault("CERTIFICATE_CHAIN", "$dir/pluginCert/chain.crt")))
+        privateKeyFile.set(File(env.getOrDefault("PRIVATE_KEY", "$dir/pluginCert/private.pem")))
+        password.set(File(env.getOrDefault("PRIVATE_KEY_PASSWORD", "$dir/pluginCert/password.txt")).readText(Charsets.UTF_8))
+    }
 }
 
 kotlin {
-    jvmToolchain(properties("javaVersion").toInt())
+    jvmToolchain(properties("javaVersion").get().toInt())
 }
 
 tasks {
@@ -51,22 +82,6 @@ tasks {
     }
 
     wrapper {
-        gradleVersion = properties("gradleVersion")
-    }
-
-    patchPluginXml {
-        version.set(properties("pluginVersion"))
-        sinceBuild.set(properties("pluginSinceBuild"))
-    }
-
-    publishPlugin {
-        token.set(env["PUBLISH_TOKEN"])
-        channels.set(listOf(env["PUBLISH_CHANNEL"] ?: "default"))
-    }
-
-    signPlugin {
-        certificateChainFile.set(File(env.getOrDefault("CERTIFICATE_CHAIN", "$dir/pluginCert/chain.crt")))
-        privateKeyFile.set(File(env.getOrDefault("PRIVATE_KEY", "$dir/pluginCert/private.pem")))
-        password.set(File(env.getOrDefault("PRIVATE_KEY_PASSWORD", "$dir/pluginCert/password.txt")).readText(Charsets.UTF_8))
+        gradleVersion = properties("gradleVersion").get()
     }
 }

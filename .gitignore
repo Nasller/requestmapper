@@ -15,3 +15,4 @@ yarn-error.log
 samples/
 .DS_Store
 idea-sandbox/
+.intellijPlatform/
