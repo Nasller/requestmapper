@@ -46,15 +46,15 @@ intellijPlatform {
     sandboxContainer = layout.projectDirectory.dir("idea-sandbox")
     buildSearchableOptions = false
 
-    publishing {
-        token.set(env["PUBLISH_TOKEN"])
-        channels.set(listOf(env["PUBLISH_CHANNEL"] ?: "default"))
-    }
-
     signing {
         certificateChainFile.set(File(env.getOrDefault("CERTIFICATE_CHAIN", "$dir/pluginCert/chain.crt")))
         privateKeyFile.set(File(env.getOrDefault("PRIVATE_KEY", "$dir/pluginCert/private.pem")))
         password.set(File(env.getOrDefault("PRIVATE_KEY_PASSWORD", "$dir/pluginCert/password.txt")).readText(Charsets.UTF_8))
+    }
+
+    publishing {
+        token.set(env["PUBLISH_TOKEN"])
+        channels.set(listOf(env["PUBLISH_CHANNEL"] ?: "default"))
     }
 }
 
